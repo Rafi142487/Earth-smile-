@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <!-- Background studio surface -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stopColor="#FFFFFF" />
+      <stop offset="80%" stopColor="#F9F8F5" />
+      <stop offset="100%" stopColor="#F2EFE9" />
+    </radialGradient>
+
+    <!-- Natural Moso Bamboo Gradient -->
+    <linearGradient id="bambooLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#EADECC" />
+      <stop offset="35%" stopColor="#DBC8AB" />
+      <stop offset="70%" stopColor="#CBBA9A" />
+      <stop offset="100%" stopColor="#B39F7C" />
+    </linearGradient>
+
+    <!-- Bamboo Tongue Scraper Gradient -->
+    <linearGradient id="bambooScraper" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#DFD0BA" />
+      <stop offset="50%" stopColor="#CEBCA2" />
+      <stop offset="100%" stopColor="#B8A384" />
+    </linearGradient>
+
+    <!-- Charcoal Bristles Gradient -->
+    <linearGradient id="charcoalBristles" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#303231" />
+      <stop offset="40%" stopColor="#222423" />
+      <stop offset="100%" stopColor="#141515" />
+    </linearGradient>
+
+    <!-- Soft Drop Shadows -->
+    <filter id="brushShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="15" dy="25" stdDeviation="14" flood-color="#141a16" flood-opacity="0.14" />
+    </filter>
+    <filter id="scraperShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="10" dy="18" stdDeviation="10" flood-color="#141a16" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Clean Off-white Studio Canvas -->
+  <rect width="800" height="800" fill="url(#bgGlow)" />
+
+  <!-- ==================== TOP: CROSSED BAMBOO TOOTHBRUSHES ==================== -->
+  
+  <!-- Toothbrush 1 (Underneath, tilted from bottom-left to top-right) -->
+  <g transform="translate(400, 260) rotate(-16) translate(-400, -260)" filter="url(#brushShadow)">
+    <!-- Bamboo handle body -->
+    <path d="M 120 280 C 220 270, 340 245, 480 215 C 570 195, 620 180, 640 160 C 655 145, 645 130, 625 135 C 595 145, 540 170, 460 195 C 330 230, 200 260, 110 270 C 95 272, 95 282, 120 280 Z"
+          fill="url(#bambooLight)" stroke="#B39E7B" stroke-width="1.5" />
+    <!-- Natural bamboo growth rings / subtle nodes -->
+    <path d="M 230 268 Q 235 258 231 250" stroke="#9A8360" stroke-width="1.2" opacity="0.45" fill="none" />
+    <path d="M 370 240 Q 375 230 371 222" stroke="#9A8360" stroke-width="1.2" opacity="0.45" fill="none" />
+    <!-- Charcoal Bristle Head -->
+    <g transform="translate(605, 125) rotate(-22)">
+      <rect x="0" y="0" width="60" height="32" rx="6" fill="url(#charcoalBristles)" />
+      <!-- Bristle tuft textures -->
+      <line x1="10" y1="0" x2="10" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+      <line x1="20" y1="0" x2="20" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+      <line x1="30" y1="0" x2="30" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+      <line x1="40" y1="0" x2="40" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+      <line x1="50" y1="0" x2="50" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+    </g>
+    <!-- Laser engraved branding text -->
+    <text x="240" y="260" transform="rotate(-13 240 260)" fill="#5A4027" font-size="16" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" letter-spacing="2" opacity="0.85">
+      EARTH SMILE
+    </text>
+  </g>
+
+  <!-- Toothbrush 2 (Over top, crossing down) -->
+  <g transform="translate(420, 240) rotate(-34) translate(-420, -240)" filter="url(#brushShadow)">
+    <!-- Bamboo handle body -->
+    <path d="M 120 300 C 220 290, 350 260, 490 220 C 580 195, 630 175, 650 155 C 665 140, 650 125, 630 130 C 600 140, 545 170, 465 200 C 330 240, 200 280, 110 290 C 95 292, 95 302, 120 300 Z"
+          fill="url(#bambooLight)" stroke="#B39E7B" stroke-width="1.5" />
+    <!-- Charcoal Bristle Head -->
+    <g transform="translate(615, 120) rotate(-22)">
+      <rect x="0" y="0" width="60" height="32" rx="6" fill="url(#charcoalBristles)" />
+      <line x1="12" y1="0" x2="12" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+      <line x1="24" y1="0" x2="24" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+      <line x1="36" y1="0" x2="36" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+      <line x1="48" y1="0" x2="48" y2="32" stroke="#484B49" stroke-width="1.2" stroke-dasharray="2,2" />
+    </g>
+    <!-- Laser engraved branding text -->
+    <text x="240" y="278" transform="rotate(-15 240 278)" fill="#5A4027" font-size="16" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" letter-spacing="2" opacity="0.85">
+      EARTH SMILE
+    </text>
+  </g>
+
+  <!-- ==================== BOTTOM: NATURAL CURVED BAMBOO TONGUE CLEANER ==================== -->
+  <g transform="translate(420, 600) rotate(14) translate(-420, -600)" filter="url(#scraperShadow)">
+    <!-- Curved thin bamboo strip arching gently -->
+    <path d="M 160 550 C 260 500, 360 420, 520 440 C 650 460, 720 540, 740 680" 
+          stroke="url(#bambooScraper)" stroke-width="16" stroke-linecap="round" fill="none" />
+    <!-- Inner scraper return strip for 3D depth -->
+    <path d="M 360 495 C 440 435, 530 445, 600 590 L 520 720" 
+          stroke="url(#bambooScraper)" stroke-width="14" stroke-linecap="round" fill="none" opacity="0.95" />
+    <!-- Fine bamboo outer grain edge highlight -->
+    <path d="M 160 550 C 260 500, 360 420, 520 440 C 650 460, 720 540, 740 680" 
+          stroke="#EFE6D6" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6" />
+  </g>
+</svg>

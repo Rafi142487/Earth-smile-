@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  
+  --color-earth-canvas: #FBFBF9;
+  --color-earth-surface: #F4F4EE;
+  --color-earth-card: #FFFFFF;
+  --color-earth-dark: #142018;
+  --color-earth-forest: #1E3527;
+  --color-earth-moss: #3E5E4A;
+  --color-earth-sage: #88A590;
+  --color-earth-sand: #EAE6DC;
+  --color-earth-copper: #BD7B3C;
+  --color-earth-copper-light: #DE9B5E;
+  --color-earth-charcoal: #1E2320;
+  --color-earth-muted: #606863;
+  --color-earth-border: #E5E4DC;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-earth-canvas);
+    color: var(--color-earth-charcoal);
+  }
+
+  h1, h2, .font-editorial {
+    font-family: var(--font-serif);
+    font-feature-settings: "lnum", "pnum";
+  }
+}
+
+/* Custom subtle noise texture overlay for organic luxury feel */
+.bg-subtle-grain {
+  background-image: radial-gradient(rgba(30, 53, 39, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Tabular numerals for prices and counts */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Smooth custom scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F4EE;
+}
+::-webkit-scrollbar-thumb {
+  background: #C4C4BA;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9D9D91;
+}

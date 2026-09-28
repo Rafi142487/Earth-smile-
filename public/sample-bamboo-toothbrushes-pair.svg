@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <!-- Moso Bamboo Wood Gradient -->
+    <linearGradient id="bambooGradV" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#DFD1BD" />
+      <stop offset="35%" stopColor="#D2BF9E" />
+      <stop offset="70%" stopColor="#C5B18E" />
+      <stop offset="100%" stopColor="#AD9874" />
+    </linearGradient>
+
+    <!-- Charcoal Bristles Gradient -->
+    <linearGradient id="charcoalBristlesV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#3A3C3B" />
+      <stop offset="40%" stopColor="#252726" />
+      <stop offset="100%" stopColor="#141515" />
+    </linearGradient>
+
+    <!-- Brush Drop Shadow -->
+    <filter id="brushShadowV" x="-20%" y="-10%" width="140%" height="120%">
+      <feDropShadow dx="12" dy="20" stdDeviation="15" flood-color="#19201a" flood-opacity="0.10" />
+    </filter>
+  </defs>
+
+  <!-- Clean Minimalist Background -->
+  <rect width="800" height="800" fill="#FFFFFF" />
+
+  <!-- ==================== LEFT BAMBOO TOOTHBRUSH ==================== -->
+  <g transform="translate(320, 420)" filter="url(#brushShadowV)">
+    <!-- Charcoal Bristle Head -->
+    <g transform="translate(-18, -325)">
+      <rect x="0" y="0" width="36" height="85" rx="10" fill="url(#charcoalBristlesV)" />
+      <!-- Bristle vertical multi-fiber texture lines -->
+      <line x1="6" y1="0" x2="6" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="12" y1="0" x2="12" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="18" y1="0" x2="18" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="24" y1="0" x2="24" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="30" y1="0" x2="30" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+    </g>
+
+    <!-- Ergonomic Bamboo Handle Body -->
+    <path d="M -16 -245 C -16 -210, -11 -120, -12 40 C -13 140, -22 250, -18 310 C -16 325, 16 325, 18 310 C 22 250, 13 140, 12 40 C 11 -120, 16 -210, 16 -245 Z"
+          fill="url(#bambooGradV)" stroke="#B7A382" stroke-width="1.2" />
+
+    <!-- Bamboo Natural Fibers & Growth Nodes -->
+    <line x1="-12" y1="-80" x2="12" y2="-80" stroke="#9E8867" stroke-width="0.8" opacity="0.4" />
+    <line x1="-15" y1="120" x2="15" y2="120" stroke="#9E8867" stroke-width="0.8" opacity="0.4" />
+
+    <!-- Laser Engraved Logo (Vertical Text along Handle) -->
+    <text x="0" y="220" text-anchor="middle" transform="rotate(-90 0 220)" fill="#4A341E" font-size="19" font-family="'Cormorant Garamond', Georgia, serif" font-weight="600" letter-spacing="3" opacity="0.9">
+      Earth Smile
+    </text>
+  </g>
+
+  <!-- ==================== RIGHT BAMBOO TOOTHBRUSH ==================== -->
+  <g transform="translate(480, 420)" filter="url(#brushShadowV)">
+    <!-- Charcoal Bristle Head -->
+    <g transform="translate(-18, -325)">
+      <rect x="0" y="0" width="36" height="85" rx="10" fill="url(#charcoalBristlesV)" />
+      <line x1="6" y1="0" x2="6" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="12" y1="0" x2="12" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="18" y1="0" x2="18" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="24" y1="0" x2="24" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+      <line x1="30" y1="0" x2="30" y2="85" stroke="#4C504E" stroke-width="1.2" stroke-dasharray="3,3" />
+    </g>
+
+    <!-- Ergonomic Bamboo Handle Body -->
+    <path d="M -16 -245 C -16 -210, -11 -120, -12 40 C -13 140, -22 250, -18 310 C -16 325, 16 325, 18 310 C 22 250, 13 140, 12 40 C 11 -120, 16 -210, 16 -245 Z"
+          fill="url(#bambooGradV)" stroke="#B7A382" stroke-width="1.2" />
+
+    <line x1="-12" y1="-50" x2="12" y2="-50" stroke="#9E8867" stroke-width="0.8" opacity="0.4" />
+    <line x1="-15" y1="150" x2="15" y2="150" stroke="#9E8867" stroke-width="0.8" opacity="0.4" />
+
+    <!-- Laser Engraved Logo (Vertical Text along Handle) -->
+    <text x="0" y="220" text-anchor="middle" transform="rotate(-90 0 220)" fill="#4A341E" font-size="19" font-family="'Cormorant Garamond', Georgia, serif" font-weight="600" letter-spacing="3" opacity="0.9">
+      Earth Smile
+    </text>
+  </g>
+</svg>
