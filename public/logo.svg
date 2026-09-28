@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="logo-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2B777"/>
+      <stop offset="100%" stop-color="#BD7B3C"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="#192E22"/>
+  <!-- Leaf / Tooth Organic Shape -->
+  <path d="M100 48 C76 78 66 104 100 128 C134 104 124 78 100 48 Z" fill="#8BB391"/>
+  <!-- Smile Arc -->
+  <path d="M58 138 Q 100 174 142 138" stroke="url(#logo-gold)" stroke-width="12" stroke-linecap="round" fill="none"/>
+</svg>

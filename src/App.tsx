@@ -25,22 +25,50 @@ export default function App() {
   const [enquiryProductName, setEnquiryProductName] = useState<string>('');
   const [activeSection, setActiveSection] = useState('home');
 
-  // Load products on mount
+  // Load products and synchronize route on mount and navigation
   useEffect(() => {
     setProducts(productService.getProducts());
 
-    // Listen to hash changes (for direct product links like #product/bamboo-toothbrush)
-    const handleHash = () => {
+    const parseCurrentRoute = () => {
+      const pathname = window.location.pathname;
       const hash = window.location.hash;
-      if (hash.startsWith('#product/')) {
-        const slug = hash.replace('#product/', '');
-        setSelectedProductSlug(slug);
+
+      // 1. Direct path routing: /product/:slug or /products/:slug
+      const pathMatch = pathname.match(/^\/(?:product|products)\/([a-zA-Z0-9_-]+)\/?$/i);
+      if (pathMatch && pathMatch[1]) {
+        setSelectedProductSlug(pathMatch[1]);
+        return;
+      }
+
+      // 2. Hash routing: #product/:slug or #product-:slug
+      const hashMatch = hash.match(/^#product[/-]([a-zA-Z0-9_-]+)$/i);
+      if (hashMatch && hashMatch[1]) {
+        setSelectedProductSlug(hashMatch[1]);
+        return;
+      }
+
+      // No product modal active
+      setSelectedProductSlug(null);
+
+      // Section anchor smooth scroll support (e.g. /why-us, #b2b, #custom-branding)
+      const targetId = (hash ? hash.replace('#', '') : pathname.replace(/^\//, '')).replace(/\/$/, '');
+      if (targetId && !['product', 'products'].includes(targetId)) {
+        const el = document.getElementById(targetId);
+        if (el) {
+          setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
+        }
       }
     };
 
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    parseCurrentRoute();
+
+    window.addEventListener('popstate', parseCurrentRoute);
+    window.addEventListener('hashchange', parseCurrentRoute);
+
+    return () => {
+      window.removeEventListener('popstate', parseCurrentRoute);
+      window.removeEventListener('hashchange', parseCurrentRoute);
+    };
   }, []);
 
   const handleOpenEnquiry = (productName?: string) => {
@@ -50,13 +78,15 @@ export default function App() {
 
   const handleSelectProduct = (productSlug: string) => {
     setSelectedProductSlug(productSlug);
-    window.location.hash = `#product/${productSlug}`;
+    window.history.pushState(null, '', `/product/${productSlug}`);
   };
 
   const handleCloseProductModal = () => {
     setSelectedProductSlug(null);
-    if (window.location.hash.startsWith('#product/')) {
-      history.replaceState(null, '', window.location.pathname);
+    if (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/products/')) {
+      window.history.pushState(null, '', '/');
+    } else if (window.location.hash.startsWith('#product')) {
+      window.history.pushState(null, '', window.location.pathname);
     }
   };
 
@@ -73,6 +103,15 @@ export default function App() {
   const relatedProducts = activeDetailProduct
     ? productService.getRelatedProducts(activeDetailProduct.id, activeDetailProduct.category, 2)
     : [];
+
+  // Synchronize document title with active product modal
+  useEffect(() => {
+    if (activeDetailProduct) {
+      document.title = `${activeDetailProduct.name} | EARTH SMILE`;
+    } else {
+      document.title = 'EARTH SMILE – Eco-Conscious Dental Care & Custom Branding';
+    }
+  }, [activeDetailProduct]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FBFBF9] text-[#1C1F1D] selection:bg-[#E2ECE3] selection:text-[#192E22]">

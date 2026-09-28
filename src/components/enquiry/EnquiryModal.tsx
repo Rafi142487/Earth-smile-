@@ -41,6 +41,18 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
     }
   }, [defaultProductName]);
 
+  // Close on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const validate = () => {
@@ -103,6 +115,9 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="enquiry-modal-title"
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
     >
       <div className="bg-[#FAF9F5] border border-[#E3E2D8] rounded-2xl w-full max-w-2xl my-auto shadow-2xl overflow-hidden relative">

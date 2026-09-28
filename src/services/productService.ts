@@ -7,7 +7,13 @@ export const productService = {
   },
 
   getProductBySlug(slug: string): Product | undefined {
-    return INITIAL_PRODUCTS.find(p => p.slug === slug || p.id === slug);
+    if (!slug) return undefined;
+    const clean = slug.toLowerCase().trim().replace(/_/g, '-');
+    return INITIAL_PRODUCTS.find(p => {
+      const pSlug = p.slug.toLowerCase();
+      const pId = p.id.toLowerCase();
+      return pSlug === clean || pId === clean || (clean.length > 5 && (pSlug.includes(clean) || clean.includes(pSlug)));
+    });
   },
 
   getFeaturedProducts(): Product[] {

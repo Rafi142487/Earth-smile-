@@ -1,4 +1,4 @@
-import React, { useState, useRef, ChangeEvent } from 'react';
+import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { Product } from '../../types';
 import { ProductVisual } from '../common/ProductVisual';
 import { X, Check, ArrowRight, Upload, Sparkles, MessageCircle, ImageIcon } from 'lucide-react';
@@ -26,6 +26,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const [customLogoPreview, setCustomLogoPreview] = useState('YOUR CLINIC / HOTEL');
   const [uploadedLogo, setUploadedLogo] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   if (!product) return null;
 
@@ -65,6 +76,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="product-detail-title"
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex justify-center p-3 sm:p-6 lg:p-10 animate-in fade-in duration-200"
     >
       <div className="bg-[#FBFBF9] border border-[#E5E4DC] rounded-2xl w-full max-w-5xl my-auto shadow-2xl overflow-hidden relative">
