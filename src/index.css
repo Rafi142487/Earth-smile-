@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
@@ -24,6 +26,12 @@
     font-family: var(--font-sans);
     background-color: var(--color-earth-canvas);
     color: var(--color-earth-charcoal);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .dark body {
+    background-color: #0E1611;
+    color: #E2ECE5;
   }
 
   h1, h2, .font-editorial {
@@ -32,10 +40,26 @@
   }
 }
 
-/* Custom subtle noise texture overlay for organic luxury feel */
+/* Luxury card and button hover micro-interactions */
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -6px rgba(20, 32, 24, 0.12);
+}
+
+.dark .hover-lift:hover {
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.45);
+}
+
+/* Subtle organic grain */
 .bg-subtle-grain {
   background-image: radial-gradient(rgba(30, 53, 39, 0.04) 1px, transparent 0);
   background-size: 24px 24px;
+}
+.dark .bg-subtle-grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
 }
 
 /* Tabular numerals for prices and counts */
@@ -50,10 +74,19 @@
 ::-webkit-scrollbar-track {
   background: #F4F4EE;
 }
+.dark ::-webkit-scrollbar-track {
+  background: #101B14;
+}
 ::-webkit-scrollbar-thumb {
   background: #C4C4BA;
   border-radius: 4px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #2D4736;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #9D9D91;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3E634B;
 }

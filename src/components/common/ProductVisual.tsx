@@ -1,4 +1,5 @@
 import React, { useState, useRef, MouseEvent } from 'react';
+import { ProgressiveImage } from './ProgressiveImage';
 
 interface ProductVisualProps {
   type: 'toothbrush' | 'tongue-cleaner' | 'combo' | 'case' | 'generic';
@@ -98,13 +99,20 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
         {/* Real photo if available & not errored */}
         {imageUrl && !imageError ? (
           <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-lg">
-            <img
+            <ProgressiveImage
               src={imageUrl}
               alt={alt}
-              referrerPolicy="no-referrer"
+              placeholderType={
+                type === 'toothbrush'
+                  ? 'toothbrush'
+                  : type === 'tongue-cleaner'
+                  ? 'tongue-cleaner'
+                  : type === 'combo'
+                  ? 'combo'
+                  : 'default'
+              }
               onError={() => setImageError(true)}
-              className="w-full h-full object-contain object-center p-2 transition-transform duration-700 ease-out hover:scale-105"
-              loading="lazy"
+              className="p-2 transition-transform duration-700 ease-out hover:scale-105"
             />
 
             {/* Live Laser Engraving Simulation Overlay */}

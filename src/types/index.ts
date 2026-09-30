@@ -65,6 +65,8 @@ export interface LeadEnquiry {
   message: string;
   leadSource: string;
   status: 'new' | 'contacted' | 'quoted' | 'closed' | 'archived';
+  adminNotes?: string;
+  estimatedValue?: number;
 }
 
 export interface Category {

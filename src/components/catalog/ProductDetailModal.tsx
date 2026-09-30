@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { Product } from '../../types';
 import { ProductVisual } from '../common/ProductVisual';
-import { X, Check, ArrowRight, Upload, Sparkles, MessageCircle, ImageIcon } from 'lucide-react';
-import { buildWhatsAppUrl } from '../../utils/whatsapp';
+import { X, Check, ArrowRight, Upload, Sparkles, ImageIcon } from 'lucide-react';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
+import { buildWhatsAppUrl, EARTH_SMILE_PHONE } from '../../utils/whatsapp';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -225,15 +226,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </div>
 
               {/* Pricing & Commercial Terms */}
-              <div className="p-4 bg-[#F5F5EE] border border-[#E5E4DB] rounded-xl">
+              <div className="p-4 bg-[#F5F5EE] dark:bg-[#14231B] border border-[#E5E4DB] dark:border-[#233B2C] rounded-xl">
                 <div className="flex items-baseline justify-between mb-1">
-                  <span className="text-xs text-[#6B736E]">Estimated Unit Wholesale Rate:</span>
-                  <span className="text-2xl font-serif font-bold text-[#192E22] font-mono tabular-nums">
+                  <span className="text-xs font-semibold text-[#192E22] dark:text-white uppercase font-mono tracking-wider">
+                    Max Price / MRP:
+                  </span>
+                  <span className="text-3xl font-serif font-bold text-[#192E22] dark:text-white font-mono tabular-nums">
                     {product.price}
                   </span>
                 </div>
-                <p className="text-[11px] text-[#78827C]">
-                  Volume discounts apply at 250, 500, 1,000, and 5,000+ units. Final quote includes laser logo proofing.
+                <p className="text-[11px] text-[#78827C] dark:text-[#9FB1A5]">
+                  Wholesale volume discounts available on bulk orders. Pre-print laser branding included.
                 </p>
               </div>
 
@@ -284,8 +287,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   rel="noopener noreferrer"
                   className="w-full py-3 px-6 text-xs font-semibold text-[#192E22] bg-[#EAF2EC] hover:bg-[#D9E7DC] border border-[#C5D8CB] rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <MessageCircle className="w-4 h-4 text-[#2D5A3C]" />
-                  <span>Send Design Proof to WhatsApp (6300136446)</span>
+                  <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                  <span>Send Design Proof to WhatsApp (+91 {EARTH_SMILE_PHONE})</span>
                 </a>
               </div>
             </div>

@@ -1,14 +1,16 @@
 import React from 'react';
 import { BrandLogo } from '../common/BrandLogo';
-import { ArrowUpRight, Phone, Mail, MapPin, ShieldCheck, Sparkles, MessageCircle } from 'lucide-react';
+import { ArrowUpRight, Phone, Mail, MapPin, ShieldCheck, Sparkles, Lock } from 'lucide-react';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 import { EARTH_SMILE_PHONE, buildWhatsAppUrl } from '../../utils/whatsapp';
 
 interface FooterProps {
   onOpenEnquiry: (productName?: string) => void;
   onOpenBrandingStudio: () => void;
+  onOpenAdmin?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStudio }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStudio, onOpenAdmin }) => {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -125,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
             </h4>
             <div className="space-y-2.5 text-xs text-[#B5C2B9]">
               <div className="flex items-start gap-2.5">
-                <MessageCircle className="w-4 h-4 text-[#DE9B5E] shrink-0 mt-0.5" />
+                <WhatsAppIcon className="w-4 h-4 text-[#25D366] shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[10px] text-[#869A8C] block">Direct WhatsApp & Support:</span>
                   <a
@@ -197,7 +199,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
             </p>
           </div>
 
-          <div className="flex items-center gap-6 text-[11px]">
+          <div className="flex items-center gap-5 text-[11px] flex-wrap justify-center sm:justify-end">
             <span className="text-[#8FA596]">
               WhatsApp: <strong>+91 {EARTH_SMILE_PHONE}</strong>
             </span>
@@ -205,6 +207,19 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
             <span className="text-[#8FA596]">
               100% Organic Moso Bamboo
             </span>
+            <span className="text-[#55695C]">·</span>
+            <a
+              href="/admin"
+              onClick={e => {
+                e.preventDefault();
+                onOpenAdmin?.();
+              }}
+              className="text-[#7F9485] hover:text-[#DE9B5E] transition-colors inline-flex items-center gap-1 cursor-pointer"
+              title="Commercial Administrator Portal"
+            >
+              <Lock className="w-2.5 h-2.5" />
+              <span>Staff Portal</span>
+            </a>
           </div>
         </div>
       </div>

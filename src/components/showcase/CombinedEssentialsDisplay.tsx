@@ -1,6 +1,8 @@
 import React, { useState, useRef, MouseEvent } from 'react';
 import { Product } from '../../types';
-import { Check, Sparkles, MessageCircle, ArrowRight, Layers, SlidersHorizontal, ShieldCheck } from 'lucide-react';
+import { ProgressiveImage } from '../common/ProgressiveImage';
+import { Check, Sparkles, ArrowRight, Layers, SlidersHorizontal, ShieldCheck } from 'lucide-react';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 import { buildWhatsAppUrl, EARTH_SMILE_PHONE } from '../../utils/whatsapp';
 
 interface CombinedEssentialsDisplayProps {
@@ -167,16 +169,16 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
                     className="absolute left-2 sm:left-4 top-4 bottom-4 w-[54%] rounded-xl overflow-hidden shadow-lg border border-[#E7E5DC] bg-white transition-transform duration-500 hover:scale-105 z-10 p-1 flex items-center justify-center"
                     style={{ transform: 'rotate(-2deg)' }}
                   >
-                    <img
+                    <ProgressiveImage
                       src="/real-bamboo-toothbrush.jpg"
                       alt="Authentic Bamboo Toothbrush with charcoal bristles"
-                      className="w-full h-full object-contain"
+                      placeholderType="toothbrush"
                     />
-                    <div className="absolute top-3 left-3 bg-[#192E22]/90 text-white text-[10px] font-mono uppercase px-2 py-0.5 rounded shadow-xs">
+                    <div className="absolute top-3 left-3 bg-[#192E22]/90 text-white text-[10px] font-mono uppercase px-2 py-0.5 rounded shadow-xs z-10">
                       Item 01: Toothbrush
                     </div>
                     {/* Synchronized Laser Logo Overlay on Toothbrush */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#EADCC8]/90 backdrop-blur-xs px-3 py-1 rounded text-[10px] font-serif italic text-[#4A321A] border border-[#C5B498] shadow-sm max-w-[85%] text-center truncate">
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#EADCC8]/90 backdrop-blur-xs px-3 py-1 rounded text-[10px] font-serif italic text-[#4A321A] border border-[#C5B498] shadow-sm max-w-[85%] text-center truncate z-10">
                       {logoText}
                     </div>
                   </div>
@@ -186,16 +188,16 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
                     className="absolute right-2 sm:right-4 top-6 bottom-2 w-[54%] rounded-xl overflow-hidden shadow-xl border border-[#E7E5DC] bg-white transition-transform duration-500 hover:scale-105 z-20 p-1 flex items-center justify-center"
                     style={{ transform: 'rotate(2deg)' }}
                   >
-                    <img
+                    <ProgressiveImage
                       src="/real-tongue-cleaner.png"
                       alt="Authentic Bamboo Tongue Cleaner"
-                      className="w-full h-full object-contain"
+                      placeholderType="tongue-cleaner"
                     />
-                    <div className="absolute top-3 right-3 bg-[#BD7B3C] text-white text-[10px] font-mono uppercase px-2 py-0.5 rounded shadow-xs">
+                    <div className="absolute top-3 right-3 bg-[#BD7B3C] text-white text-[10px] font-mono uppercase px-2 py-0.5 rounded shadow-xs z-10">
                       Item 02: Tongue Cleaner
                     </div>
                     {/* Synchronized Laser Logo Overlay on Tongue Cleaner */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#EADCC8]/90 backdrop-blur-xs px-3 py-1 rounded text-[10px] font-serif italic text-[#4A321A] border border-[#C5B498] shadow-sm max-w-[85%] text-center truncate">
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#EADCC8]/90 backdrop-blur-xs px-3 py-1 rounded text-[10px] font-serif italic text-[#4A321A] border border-[#C5B498] shadow-sm max-w-[85%] text-center truncate z-10">
                       {logoText}
                     </div>
                   </div>
@@ -211,13 +213,13 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
               {/* VIEW 2: RITUAL COMPOSITION (Complete pair presentation photo) */}
               {viewMode === 'ritual' && (
                 <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg border border-[#E7E5DC] bg-white p-2 flex items-center justify-center">
-                  <img
+                  <ProgressiveImage
                     src="/real-brush-and-cleaner.jpg"
                     alt="Authentic Bamboo Toothbrush and Tongue Cleaner product photography"
-                    className="w-full h-full object-contain"
+                    placeholderType="combo"
                   />
                   {/* Coordinated Laser Branding on Ritual Canvas */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#EADCC8]/90 backdrop-blur-xs px-4 py-1.5 rounded-lg text-xs font-serif italic text-[#4A321A] border border-[#C5B498] shadow-md text-center max-w-[80%] truncate">
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#EADCC8]/90 backdrop-blur-xs px-4 py-1.5 rounded-lg text-xs font-serif italic text-[#4A321A] border border-[#C5B498] shadow-md text-center max-w-[80%] truncate z-10">
                     <span className="block text-[9px] font-mono tracking-widest text-[#745B41] not-italic uppercase mb-0.5">
                       Matched Dual Laser Engraving
                     </span>
@@ -231,30 +233,30 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
                 <div className="grid grid-cols-2 gap-3 w-full h-full">
                   {/* Left Side: Toothbrush */}
                   <div className="relative rounded-xl overflow-hidden shadow-md border border-[#E7E5DC] bg-white flex flex-col justify-between p-2">
-                    <img
+                    <ProgressiveImage
                       src="/real-bamboo-toothbrush.jpg"
                       alt="Authentic Bamboo Toothbrush"
-                      className="w-full h-full object-contain"
+                      placeholderType="toothbrush"
                     />
-                    <div className="absolute top-2 left-2 bg-[#192E22] text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                    <div className="absolute top-2 left-2 bg-[#192E22] text-white text-[10px] font-mono px-2 py-0.5 rounded z-10">
                       Toothbrush
                     </div>
-                    <div className="absolute bottom-2 left-2 right-2 bg-[#EADCC8]/90 backdrop-blur-xs p-1 rounded text-center text-[10px] font-serif text-[#4A321A] truncate border border-[#C5B498]">
+                    <div className="absolute bottom-2 left-2 right-2 bg-[#EADCC8]/90 backdrop-blur-xs p-1 rounded text-center text-[10px] font-serif text-[#4A321A] truncate border border-[#C5B498] z-10">
                       {logoText}
                     </div>
                   </div>
 
                   {/* Right Side: Tongue Cleaner */}
                   <div className="relative rounded-xl overflow-hidden shadow-md border border-[#E7E5DC] bg-white flex flex-col justify-between p-2">
-                    <img
+                    <ProgressiveImage
                       src="/real-tongue-cleaner.png"
                       alt="Authentic Bamboo Tongue Cleaner"
-                      className="w-full h-full object-contain"
+                      placeholderType="tongue-cleaner"
                     />
-                    <div className="absolute top-2 left-2 bg-[#BD7B3C] text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                    <div className="absolute top-2 left-2 bg-[#BD7B3C] text-white text-[10px] font-mono px-2 py-0.5 rounded z-10">
                       Tongue Cleaner
                     </div>
-                    <div className="absolute bottom-2 left-2 right-2 bg-[#EADCC8]/90 backdrop-blur-xs p-1 rounded text-center text-[10px] font-serif text-[#4A321A] truncate border border-[#C5B498]">
+                    <div className="absolute bottom-2 left-2 right-2 bg-[#EADCC8]/90 backdrop-blur-xs p-1 rounded text-center text-[10px] font-serif text-[#4A321A] truncate border border-[#C5B498] z-10">
                       {logoText}
                     </div>
                   </div>
@@ -345,19 +347,23 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
             </div>
           </div>
 
-          {/* Quick Specifications Strip */}
-          <div className="p-4 bg-[#F5F5EE] border border-[#ECEBE2] rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+          {/* Quick Specifications Strip & Exact Combo Price */}
+          <div className="p-4 bg-[#F5F5EE] dark:bg-[#14231B] border border-[#ECEBE2] dark:border-[#233B2C] rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div>
-              <span className="text-[#78817B] block text-[11px]">Set MOQ:</span>
-              <span className="font-mono font-semibold text-[#192E22]">50 Sets</span>
+              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Combo Max Price:</span>
+              <span className="font-serif text-base font-bold text-[#192E22] dark:text-white">₹129/-</span>
             </div>
             <div>
-              <span className="text-[#78817B] block text-[11px]">Material:</span>
-              <span className="font-medium text-[#192E22]">100% Moso Bamboo</span>
+              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Set MOQ:</span>
+              <span className="font-mono font-semibold text-[#192E22] dark:text-white">50 Sets</span>
             </div>
             <div>
-              <span className="text-[#78817B] block text-[11px]">Proofing:</span>
-              <span className="font-semibold text-[#BD7B3C]">Pre-Print Preview</span>
+              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Material:</span>
+              <span className="font-medium text-[#192E22] dark:text-white">100% Bamboo</span>
+            </div>
+            <div>
+              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Proofing:</span>
+              <span className="font-semibold text-[#BD7B3C]">Live Pre-Print</span>
             </div>
           </div>
 
@@ -380,7 +386,7 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
               rel="noopener noreferrer"
               className="py-3.5 px-4 text-xs font-semibold text-[#192E22] bg-[#EAF2EC] hover:bg-[#DDEADA] border border-[#CCDDCF] rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <MessageCircle className="w-4 h-4 text-[#2E5B3C]" />
+              <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
               <span>WhatsApp: {EARTH_SMILE_PHONE}</span>
             </a>
 

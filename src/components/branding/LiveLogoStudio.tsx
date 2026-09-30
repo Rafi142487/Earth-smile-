@@ -1,6 +1,7 @@
 import React, { useState, useRef, ChangeEvent } from 'react';
 import { ProductVisual } from '../common/ProductVisual';
-import { Upload, Sparkles, MessageCircle, ArrowRight, Check, RefreshCw, Eye, Image as ImageIcon, Sliders } from 'lucide-react';
+import { Upload, Sparkles, ArrowRight, Check, RefreshCw, Eye, Image as ImageIcon, Sliders } from 'lucide-react';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 import { buildWhatsAppUrl, EARTH_SMILE_PHONE } from '../../utils/whatsapp';
 
 interface LiveLogoStudioProps {
@@ -80,7 +81,8 @@ export const LiveLogoStudio: React.FC<LiveLogoStudioProps> = ({ onOpenEnquiry })
                         : 'bg-[#F2F1EA] text-[#555E59] hover:bg-[#EAE9DE]'
                     }`}
                   >
-                    Toothbrush + Cleaner Together
+                    <span>Combo Set</span>
+                    <span className="ml-1.5 opacity-80 font-mono text-[11px]">(₹129/-)</span>
                   </button>
                   <button
                     onClick={() => setSelectedProduct('toothbrush')}
@@ -90,7 +92,8 @@ export const LiveLogoStudio: React.FC<LiveLogoStudioProps> = ({ onOpenEnquiry })
                         : 'bg-[#F2F1EA] text-[#555E59] hover:bg-[#EAE9DE]'
                     }`}
                   >
-                    Bamboo Toothbrush
+                    <span>Toothbrush</span>
+                    <span className="ml-1.5 opacity-80 font-mono text-[11px]">(₹65/-)</span>
                   </button>
                   <button
                     onClick={() => setSelectedProduct('tongue-cleaner')}
@@ -100,7 +103,8 @@ export const LiveLogoStudio: React.FC<LiveLogoStudioProps> = ({ onOpenEnquiry })
                         : 'bg-[#F2F1EA] text-[#555E59] hover:bg-[#EAE9DE]'
                     }`}
                   >
-                    Bamboo Tongue Cleaner
+                    <span>Tongue Cleaner</span>
+                    <span className="ml-1.5 opacity-80 font-mono text-[11px]">(₹70/-)</span>
                   </button>
                 </div>
                 <span className="text-[11px] text-[#767E78] hidden sm:block">
@@ -265,8 +269,8 @@ export const LiveLogoStudio: React.FC<LiveLogoStudioProps> = ({ onOpenEnquiry })
                   rel="noopener noreferrer"
                   className="w-full py-3.5 px-6 text-xs sm:text-sm font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 >
-                  <MessageCircle className="w-4 h-4 text-[#DE9B5E]" />
-                  <span>Send This Custom Proof to WhatsApp (6300136446)</span>
+                  <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                  <span>Send This Custom Proof to WhatsApp (+91 {EARTH_SMILE_PHONE})</span>
                 </a>
 
                 <button

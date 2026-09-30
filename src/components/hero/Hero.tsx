@@ -19,7 +19,8 @@ export const Hero: React.FC<HeroProps> = ({
   const heroItems = {
     'bamboo-combo': {
       title: 'Bamboo Toothbrush + Tongue Cleaner Duo',
-      subtitle: 'Complete all-bamboo oral hygiene essentials paired together in debossed kraft box',
+      subtitle: 'Complete all-bamboo oral hygiene essentials paired in kraft box',
+      price: '₹129/-',
       moq: 'MOQ 50 sets',
       slug: 'bamboo-dental-combo',
       type: 'combo' as const,
@@ -28,7 +29,8 @@ export const Hero: React.FC<HeroProps> = ({
     },
     'bamboo-cleaner': {
       title: 'Artisan Curved Bamboo Tongue Cleaner',
-      subtitle: 'Natural ergonomic bamboo scraper for lifelong oral freshness & detox',
+      subtitle: 'Natural ergonomic bamboo scraper for oral freshness',
+      price: '₹70/-',
       moq: 'MOQ 50 units',
       slug: 'bamboo-tongue-cleaner',
       type: 'tongue-cleaner' as const,
@@ -37,12 +39,13 @@ export const Hero: React.FC<HeroProps> = ({
     },
     'bamboo-brush': {
       title: 'Artisan Moso Bamboo Toothbrush',
-      subtitle: 'Naturally antibacterial Moso bamboo with tapered charcoal bio-bristles',
-      moq: 'MOQ 100 units',
+      subtitle: 'Organic Moso bamboo with soft charcoal bio-bristles',
+      price: '₹65/-',
+      moq: 'MOQ 50 units',
       slug: 'bamboo-toothbrush',
       type: 'toothbrush' as const,
       image: '/real-bamboo-toothbrush.jpg',
-      features: ['Zero Plastic', 'Naturally Antibacterial', '180-day Backyard Compostable'],
+      features: ['Zero Plastic', 'Naturally Antibacterial', '100% Compostable Handle'],
     },
   };
 
@@ -222,9 +225,14 @@ export const Hero: React.FC<HeroProps> = ({
               {/* Live Mini Brand Input on Hero Card */}
               <div className="mt-3 p-4 bg-white/95 backdrop-blur-xs border border-[#E5E4DC] rounded-xl shadow-xs">
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-semibold text-[#192E22] uppercase tracking-wider">
-                    See Your Logo on Handle:
-                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-base font-serif font-bold text-[#192E22]">
+                      {currentItem.price}
+                    </span>
+                    <span className="text-[10px] uppercase font-mono text-[#78817B]">
+                      Max Price / MRP
+                    </span>
+                  </div>
                   <span className="text-[10px] font-mono text-[#BD7B3C] font-semibold">
                     {currentItem.moq}
                   </span>

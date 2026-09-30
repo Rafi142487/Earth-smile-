@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MessageCircle, MapPin, Send, CheckCircle2, Clock, Sparkles } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, Sparkles } from 'lucide-react';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 import { EARTH_SMILE_PHONE, buildWhatsAppUrl } from '../../utils/whatsapp';
 import { leadService } from '../../services/leadService';
 
@@ -81,8 +82,8 @@ export const ContactSection: React.FC = () => {
               <div className="space-y-5 text-sm">
                 {/* WhatsApp */}
                 <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-[#EAF2EC] text-[#1E3527] flex items-center justify-center shrink-0">
-                    <MessageCircle className="w-5 h-5 text-[#2E7D4E]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#EAF2EC] text-[#25D366] flex items-center justify-center shrink-0">
+                    <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />
                   </div>
                   <div>
                     <span className="text-xs text-[#737C76] font-medium block">
@@ -191,9 +192,9 @@ export const ContactSection: React.FC = () => {
                         companyName: formData.company,
                         senderName: formData.name,
                       })}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#192E22] text-white rounded-lg text-xs font-semibold"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#192E22] hover:bg-[#254231] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                     >
-                      <MessageCircle className="w-4 h-4 text-[#DE9B5E]" />
+                      <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
                       <span>Continue to WhatsApp Now</span>
                     </a>
                   </div>
@@ -214,7 +215,7 @@ export const ContactSection: React.FC = () => {
                         required
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Dr. Rajesh Kumar"
+                        placeholder="Your Full Name"
                         className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#DDDCD3] rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22]"
                       />
                     </div>
@@ -228,7 +229,7 @@ export const ContactSection: React.FC = () => {
                         required
                         value={formData.phone}
                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+91 98765 43210"
+                        placeholder="Phone / WhatsApp Number"
                         className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#DDDCD3] rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22]"
                       />
                     </div>
@@ -243,7 +244,7 @@ export const ContactSection: React.FC = () => {
                         type="email"
                         value={formData.email}
                         onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="rajesh@dentalclinic.com"
+                        placeholder="Your Email Address"
                         className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#DDDCD3] rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22]"
                       />
                     </div>
@@ -256,7 +257,7 @@ export const ContactSection: React.FC = () => {
                         type="text"
                         value={formData.company}
                         onChange={e => setFormData({ ...formData, company: e.target.value })}
-                        placeholder="Harmony Dental Care"
+                        placeholder="Organization or Clinic Name"
                         className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#DDDCD3] rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22]"
                       />
                     </div>

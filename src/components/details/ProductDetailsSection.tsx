@@ -118,13 +118,23 @@ export const ProductDetailsSection: React.FC<ProductDetailsSectionProps> = ({
             {/* Specifications Column */}
             <div className="lg:col-span-7 space-y-8">
               <div>
-                <span className="text-xs font-mono uppercase tracking-wider text-[#BD7B3C] font-semibold">
-                  Specification Sheet
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-serif font-semibold text-[#192E22] mt-1 mb-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono uppercase tracking-wider text-[#BD7B3C] font-semibold">
+                    Specification Sheet
+                  </span>
+                  <div className="text-right">
+                    <span className="text-2xl sm:text-3xl font-serif font-bold text-[#192E22] dark:text-white leading-none">
+                      {activeProduct.price}
+                    </span>
+                    <span className="text-[10px] uppercase font-mono text-[#78817B] dark:text-[#9FB1A5] block mt-0.5">
+                      Max Price / MRP
+                    </span>
+                  </div>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-serif font-semibold text-[#192E22] dark:text-white mt-1 mb-2">
                   {activeProduct.name}
                 </h3>
-                <p className="text-sm text-[#525B55] leading-relaxed">
+                <p className="text-sm text-[#525B55] dark:text-[#CBD8CE] leading-relaxed">
                   {activeProduct.description}
                 </p>
               </div>

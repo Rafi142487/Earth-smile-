@@ -193,7 +193,7 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
                       type="text"
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Dr. Rajesh Khanna"
+                      placeholder="Contact person name"
                       className={`w-full pl-9 pr-3 py-2 bg-white border rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22] ${
                         errors.name ? 'border-red-500 bg-red-50/20' : 'border-[#D9D8CF]'
                       }`}
@@ -212,7 +212,7 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
                       type="tel"
                       value={formData.phone}
                       onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="e.g. 9845012345"
+                      placeholder="Mobile / WhatsApp number"
                       className={`w-full pl-9 pr-3 py-2 bg-white border rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22] ${
                         errors.phone ? 'border-red-500 bg-red-50/20' : 'border-[#D9D8CF]'
                       }`}
@@ -234,7 +234,7 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
                       type="email"
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="contact@company.com"
+                      placeholder="Work / Business email"
                       className={`w-full pl-9 pr-3 py-2 bg-white border rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22] ${
                         errors.email ? 'border-red-500 bg-red-50/20' : 'border-[#D9D8CF]'
                       }`}
@@ -253,7 +253,7 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
                       type="text"
                       value={formData.company}
                       onChange={e => setFormData({ ...formData, company: e.target.value })}
-                      placeholder="e.g. Smile Care Dental Clinic"
+                      placeholder="Clinic, resort, or firm name"
                       className="w-full pl-9 pr-3 py-2 bg-white border border-[#D9D8CF] rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22]"
                     />
                   </div>
@@ -272,7 +272,7 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
                       type="text"
                       value={formData.city}
                       onChange={e => setFormData({ ...formData, city: e.target.value })}
-                      placeholder="e.g. Hyderabad, Telangana"
+                      placeholder="City & state location"
                       className="w-full pl-9 pr-3 py-2 bg-white border border-[#D9D8CF] rounded-lg text-xs text-[#192E22] focus:outline-none focus:ring-1 focus:ring-[#192E22]"
                     />
                   </div>

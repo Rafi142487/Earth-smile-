@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { ProductVisual } from '../common/ProductVisual';
 import { CombinedEssentialsDisplay } from './CombinedEssentialsDisplay';
-import { Check, ArrowRight, Sparkles, MessageCircle, ArrowUpRight } from 'lucide-react';
+import { Check, ArrowRight, Sparkles, ArrowUpRight } from 'lucide-react';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
+import { ProductCardSkeleton } from '../common/SkeletonLoader';
 import { Product } from '../../types';
 import { buildWhatsAppUrl } from '../../utils/whatsapp';
 
@@ -52,10 +54,10 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({
             return (
               <div
                 key={product.id}
-                className={`group bg-white border rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between hover:shadow-xl ${
+                className={`group bg-white dark:bg-[#14221A] border rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between hover-lift ${
                   isCombo
-                    ? 'border-[#BD7B3C]/50 ring-1 ring-[#BD7B3C]/20 shadow-md'
-                    : 'border-[#E4E3DA] hover:border-[#192E22]/40 shadow-xs'
+                    ? 'border-[#BD7B3C]/50 dark:border-[#BD7B3C]/40 ring-1 ring-[#BD7B3C]/20 shadow-md'
+                    : 'border-[#E4E3DA] dark:border-[#233B2C] hover:border-[#192E22]/40 dark:hover:border-[#3E634B] shadow-xs'
                 }`}
               >
                 <div>
@@ -99,30 +101,35 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({
                   {/* Product Metadata & Info */}
                   <div className="p-6 pb-2">
                     <div className="flex items-center justify-between text-xs text-[#6B736E] mb-2">
-                      <span className="font-semibold uppercase tracking-wider text-[11px] text-[#2D5A3C]">
+                      <span className="font-semibold uppercase tracking-wider text-[11px] text-[#2D5A3C] dark:text-[#A7D3B5]">
                         {product.categoryLabel}
                       </span>
-                      <span className="font-mono text-[#BD7B3C] font-semibold">
-                        MOQ: {product.moq} {product.moqUnit}
-                      </span>
+                      <div className="text-right">
+                        <span className="text-lg sm:text-xl font-bold font-serif text-[#142018] dark:text-white block leading-none">
+                          {product.price}
+                        </span>
+                        <span className="text-[9px] uppercase font-mono text-[#8C958F] dark:text-[#90A496]">
+                          Max Price / MRP
+                        </span>
+                      </div>
                     </div>
 
                     <h3
                       onClick={() => onSelectProduct(product.slug)}
-                      className="font-serif text-xl sm:text-2xl font-semibold text-[#142018] group-hover:text-[#BD7B3C] transition-colors cursor-pointer mb-2"
+                      className="font-serif text-xl sm:text-2xl font-semibold text-[#142018] dark:text-white group-hover:text-[#BD7B3C] dark:group-hover:text-[#DE9B5E] transition-colors cursor-pointer mb-2"
                     >
                       {product.name}
                     </h3>
 
-                    <p className="text-xs sm:text-sm text-[#545C56] leading-relaxed mb-5 line-clamp-2">
+                    <p className="text-xs sm:text-sm text-[#545C56] dark:text-[#CBD8CE] leading-relaxed mb-4 line-clamp-2">
                       {product.shortDescription}
                     </p>
 
                     {/* Key Features List */}
-                    <div className="space-y-2 mb-6">
+                    <div className="space-y-1.5 mb-5">
                       {product.features.slice(0, 3).map((feat, fIdx) => (
-                        <div key={fIdx} className="flex items-start gap-2 text-xs text-[#39403B]">
-                          <Check className="w-3.5 h-3.5 text-[#2E5B3C] shrink-0 mt-0.5" />
+                        <div key={fIdx} className="flex items-start gap-2 text-xs text-[#39403B] dark:text-[#BAC7BD]">
+                          <Check className="w-3.5 h-3.5 text-[#2E5B3C] dark:text-[#25D366] shrink-0 mt-0.5" />
                           <span className="line-clamp-1">{feat}</span>
                         </div>
                       ))}
@@ -131,20 +138,22 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({
                 </div>
 
                 {/* Card Action Section */}
-                <div className="p-6 pt-0 border-t border-[#F2F1EA] mt-4">
-                  <div className="flex items-center justify-between pt-4 mb-4">
-                    <div>
-                      <span className="text-[11px] text-[#78827C] block">Pricing Guidance</span>
-                      <span className="text-xs font-semibold text-[#142018]">
-                        Request a Quote
+                <div className="p-6 pt-0 border-t border-[#F2F1EA] dark:border-[#22382A] mt-2">
+                  <div className="flex items-center justify-between pt-3 mb-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-base font-bold font-serif text-[#142018] dark:text-white">
+                        {product.price}
+                      </span>
+                      <span className="text-[10px] text-[#78827C] dark:text-[#9FB1A5] font-mono">
+                        (MOQ: {product.moq} {product.moqUnit})
                       </span>
                     </div>
 
                     <button
                       onClick={() => onSelectProduct(product.slug)}
-                      className="text-xs font-semibold text-[#192E22] hover:text-[#BD7B3C] flex items-center gap-1 transition-colors cursor-pointer"
+                      className="text-xs font-semibold text-[#192E22] dark:text-[#A7D3B5] hover:text-[#BD7B3C] dark:hover:text-[#DE9B5E] flex items-center gap-1 transition-colors cursor-pointer"
                     >
-                      <span>Specifications</span>
+                      <span>Specs</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -166,9 +175,9 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({
                       })}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2.5 px-3 text-xs font-semibold text-[#192E22] bg-[#EAF2EC] hover:bg-[#DDEADA] border border-[#CCDDCF] rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 px-3 text-xs font-semibold text-[#192E22] bg-[#EAF2EC] hover:bg-[#DDEADA] border border-[#CCDDCF] rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer hover-lift"
                     >
-                      <MessageCircle className="w-3.5 h-3.5 text-[#2E5B3C]" />
+                      <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
                       <span>WhatsApp</span>
                     </a>
                   </div>

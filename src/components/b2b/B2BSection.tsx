@@ -1,5 +1,6 @@
 import React from 'react';
-import { Building2, Stethoscope, Hotel, Gift, Store, ShieldCheck, ArrowRight, Sparkles, MessageCircle } from 'lucide-react';
+import { Building2, Stethoscope, Hotel, Gift, Store, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 import { buildWhatsAppUrl, EARTH_SMILE_PHONE } from '../../utils/whatsapp';
 
 interface B2BSectionProps {
@@ -128,10 +129,10 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
                 })}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3.5 text-xs font-semibold text-white bg-[#284633] hover:bg-[#345942] border border-white/20 rounded-lg transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-3.5 text-xs font-semibold text-white bg-[#284633] hover:bg-[#345942] border border-white/20 rounded-lg transition-all cursor-pointer flex items-center gap-2 hover-lift"
               >
-                <MessageCircle className="w-4 h-4 text-[#DE9B5E]" />
-                <span>Chat on WhatsApp: {EARTH_SMILE_PHONE}</span>
+                <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+                <span>Chat on WhatsApp: +91 {EARTH_SMILE_PHONE}</span>
               </a>
             </div>
           </div>
