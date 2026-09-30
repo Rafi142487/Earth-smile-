@@ -19,39 +19,29 @@ export const ContactSection: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    leadService.submitLead({
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      company: formData.company || 'Not Specified',
-      city: 'India',
-      productName: formData.product,
-      quantity: Number(formData.quantity),
-      customBranding: formData.customBranding,
-      message: formData.message,
-      leadSource: 'On-Page Contact Section',
-    });
-
-    setIsSubmitting(false);
-    setSubmitted(true);
-
-    // Build WhatsApp message and open
-    const waUrl = buildWhatsAppUrl({
-      productName: formData.product,
-      quantity: Number(formData.quantity),
-      customBranding: formData.customBranding,
-      companyName: formData.company,
-      senderName: formData.name,
-      customQuery: formData.message,
-    });
-
-    setTimeout(() => {
-      window.location.href = waUrl;
-    }, 1200);
+    try {
+      await leadService.submitLeadAsync({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        company: formData.company || 'Not Specified',
+        city: 'India',
+        productName: formData.product,
+        quantity: Number(formData.quantity),
+        customBranding: formData.customBranding,
+        message: formData.message,
+        leadSource: 'On-Page Contact Section',
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Contact form submission error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -174,17 +164,23 @@ export const ContactSection: React.FC = () => {
           <div className="lg:col-span-7">
             <div className="bg-white border border-[#E3E2D8] rounded-2xl p-7 sm:p-10 shadow-xs">
               {submitted ? (
-                <div className="py-12 text-center space-y-4">
+                <div className="py-10 text-center space-y-4">
                   <div className="w-14 h-14 rounded-full bg-[#EBF4EE] text-[#2E7D4E] flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-8 h-8" />
                   </div>
-                  <h3 className="font-serif text-2xl font-semibold text-[#192E22]">
-                    Enquiry Recorded
-                  </h3>
-                  <p className="text-sm text-[#555E58] max-w-md mx-auto">
-                    Thank you, {formData.name}. We are transferring your details directly to our WhatsApp desk ({EARTH_SMILE_PHONE}) for an immediate quotation.
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100/70 text-emerald-800 text-[11px] font-mono font-semibold rounded-full mb-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      Stored in Supabase Database
+                    </span>
+                    <h3 className="font-serif text-2xl font-semibold text-[#192E22]">
+                      Quotation Request Registered
+                    </h3>
+                  </div>
+                  <p className="text-sm text-[#555E58] max-w-md mx-auto leading-relaxed">
+                    Thank you, <strong className="text-[#192E22]">{formData.name}</strong>. Your quotation request for <strong>{formData.quantity} units of {formData.product}</strong> has been saved directly to the database.
                   </p>
-                  <div className="pt-4">
+                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                     <a
                       href={buildWhatsAppUrl({
                         productName: formData.product,
@@ -192,11 +188,33 @@ export const ContactSection: React.FC = () => {
                         companyName: formData.company,
                         senderName: formData.name,
                       })}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-[#192E22] hover:bg-[#254231] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                     >
                       <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
-                      <span>Continue to WhatsApp Now</span>
+                      <span>Chat on WhatsApp ({EARTH_SMILE_PHONE})</span>
                     </a>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSubmitted(false);
+                        setFormData({
+                          name: '',
+                          phone: '',
+                          email: '',
+                          company: '',
+                          product: 'Bamboo Toothbrush',
+                          quantity: 100,
+                          customBranding: true,
+                          message: '',
+                        });
+                      }}
+                      className="px-4 py-3 text-xs font-semibold text-stone-600 hover:text-stone-900 border border-stone-200 hover:bg-stone-50 rounded-lg cursor-pointer"
+                    >
+                      Submit Another Request
+                    </button>
                   </div>
                 </div>
               ) : (

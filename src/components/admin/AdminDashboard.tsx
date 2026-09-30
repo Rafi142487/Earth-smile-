@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { leadService } from '../../services/leadService';
 import { authService, AdminSession } from '../../services/authService';
 import { productService } from '../../services/productService';
+import { supabase, supabaseService, SUPABASE_PROJECT_ID, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SQL_SETUP } from '../../services/supabaseService';
 import { LeadEnquiry, Product } from '../../types';
 import { BrandLogo } from '../common/BrandLogo';
 import { buildWhatsAppUrl } from '../../utils/whatsapp';
@@ -30,7 +31,10 @@ import {
   FileSpreadsheet,
   FileText,
   Save,
-  Check
+  Check,
+  Database,
+  Copy,
+  CheckCheck
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -40,9 +44,14 @@ interface AdminDashboardProps {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout }) => {
   const [session, setSession] = useState<AdminSession | null>(null);
-  const [leads, setLeads] = useState<LeadEnquiry[]>([]);
+  const [leads, setLeads] = useState<LeadEnquiry[]>(() => leadService.getLeads());
+  const [supabaseQueries, setSupabaseQueries] = useState<LeadEnquiry[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [activeTab, setActiveTab] = useState<'enquiries' | 'products' | 'security'>('enquiries');
+  const [activeTab, setActiveTab] = useState<'enquiries' | 'products' | 'security' | 'database'>('enquiries');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isTestingDb, setIsTestingDb] = useState(false);
+  const [dbTestResult, setDbTestResult] = useState<{ connected: boolean; tableFound: boolean; message: string } | null>(null);
+  const [copiedSql, setCopiedSql] = useState(false);
 
   // Filter and search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,16 +87,78 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Reload data
-  const refreshLeads = () => {
-    setLeads(leadService.getLeads());
+  // Reload & sync data with Supabase
+  const refreshLeads = async () => {
+    setIsSyncing(true);
+    try {
+      const synced = await leadService.fetchAndSyncWithSupabase();
+      setLeads(synced);
+
+      const remote = await supabaseService.fetchQuotations();
+      if (remote.success && Array.isArray(remote.data)) {
+        setSupabaseQueries(remote.data);
+      }
+    } catch {
+      setLeads(leadService.getLeads());
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   useEffect(() => {
     setSession(authService.getSession());
-    setLeads(leadService.getLeads());
     setProducts(productService.getProducts());
+
+    // Load initial leads and sync immediately with Supabase
+    refreshLeads();
+
+    // Auto-test Supabase connectivity on mount
+    supabaseService.testConnection().then(res => {
+      setDbTestResult(res);
+    }).catch(() => {});
+
+    // Supabase Real-time Listener: Live quotation updates
+    try {
+      const channel = supabase
+        .channel('realtime:quotations-admin')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'quotations' },
+          () => {
+            refreshLeads();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (e) {
+      console.warn('Realtime channel error:', e);
+    }
   }, []);
+
+  const handleTestSupabase = async () => {
+    setIsTestingDb(true);
+    try {
+      const res = await supabaseService.testConnection();
+      setDbTestResult(res);
+    } catch (e: any) {
+      setDbTestResult({
+        connected: false,
+        tableFound: false,
+        message: e?.message || 'Connection failed',
+      });
+    } finally {
+      setIsTestingDb(false);
+    }
+  };
+
+  const handleCopySql = () => {
+    navigator.clipboard.writeText(SUPABASE_SQL_SETUP);
+    setCopiedSql(true);
+    setTimeout(() => setCopiedSql(false), 2500);
+  };
 
   // Sync editing notes when selectedLead changes
   useEffect(() => {
@@ -191,21 +262,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
     ];
 
     const rows = leads.map(l => [
-      `"${l.id}"`,
-      `"${new Date(l.createdAt).toLocaleString()}"`,
-      `"${l.status.toUpperCase()}"`,
-      `"${l.name.replace(/"/g, '""')}"`,
-      `"${l.company.replace(/"/g, '""')}"`,
-      `"${l.email}"`,
-      `"${l.phone}"`,
-      `"${l.city.replace(/"/g, '""')}"`,
-      `"${l.productName.replace(/"/g, '""')}"`,
-      l.quantity,
-      l.customBranding ? 'YES' : 'NO',
-      `"${(l.brandingDetails || '').replace(/"/g, '""')}"`,
-      `"${l.message.replace(/"/g, '""')}"`,
-      `"${(l.adminNotes || '').replace(/"/g, '""')}"`,
-      `"${l.leadSource}"`,
+      `"${l?.id || ''}"`,
+      `"${l?.createdAt ? new Date(l.createdAt).toLocaleString() : ''}"`,
+      `"${(l?.status || 'new').toUpperCase()}"`,
+      `"${(l?.name || '').replace(/"/g, '""')}"`,
+      `"${(l?.company || '').replace(/"/g, '""')}"`,
+      `"${l?.email || ''}"`,
+      `"${l?.phone || ''}"`,
+      `"${(l?.city || '').replace(/"/g, '""')}"`,
+      `"${(l?.productName || '').replace(/"/g, '""')}"`,
+      Number(l?.quantity) || 50,
+      l?.customBranding ? 'YES' : 'NO',
+      `"${(l?.brandingDetails || '').replace(/"/g, '""')}"`,
+      `"${(l?.message || '').replace(/"/g, '""')}"`,
+      `"${(l?.adminNotes || '').replace(/"/g, '""')}"`,
+      `"${l?.leadSource || ''}"`,
     ]);
 
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
@@ -242,27 +313,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
 
   // Filtered Leads
   const filteredLeads = leads.filter(lead => {
+    if (!lead) return false;
+
     // Status
-    if (statusFilter !== 'all' && lead.status !== statusFilter) return false;
+    if (statusFilter !== 'all' && (lead.status || 'new') !== statusFilter) return false;
     
     // Branding
     if (brandingFilter === 'custom' && !lead.customBranding) return false;
     if (brandingFilter === 'standard' && lead.customBranding) return false;
 
     // Volume
-    if (volumeFilter === 'bulk' && lead.quantity < 500) return false;
-    if (volumeFilter === 'standard' && lead.quantity >= 500) return false;
+    const qty = Number(lead.quantity) || 0;
+    if (volumeFilter === 'bulk' && qty < 500) return false;
+    if (volumeFilter === 'standard' && qty >= 500) return false;
 
     // Search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const matchName = lead.name.toLowerCase().includes(q);
-      const matchComp = lead.company.toLowerCase().includes(q);
-      const matchEmail = lead.email.toLowerCase().includes(q);
-      const matchPhone = lead.phone.toLowerCase().includes(q);
-      const matchProd = lead.productName.toLowerCase().includes(q);
-      const matchCity = lead.city.toLowerCase().includes(q);
-      const matchMsg = lead.message.toLowerCase().includes(q);
+      const matchName = (lead.name || '').toLowerCase().includes(q);
+      const matchComp = (lead.company || '').toLowerCase().includes(q);
+      const matchEmail = (lead.email || '').toLowerCase().includes(q);
+      const matchPhone = (lead.phone || '').toLowerCase().includes(q);
+      const matchProd = (lead.productName || '').toLowerCase().includes(q);
+      const matchCity = (lead.city || '').toLowerCase().includes(q);
+      const matchMsg = (lead.message || '').toLowerCase().includes(q);
       const matchBranding = (lead.brandingDetails || '').toLowerCase().includes(q);
       const matchNotes = (lead.adminNotes || '').toLowerCase().includes(q);
       return matchName || matchComp || matchEmail || matchPhone || matchProd || matchCity || matchMsg || matchBranding || matchNotes;
@@ -272,10 +346,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
 
   // Key performance numbers
   const totalLeads = leads.length;
-  const newLeadsCount = leads.filter(l => l.status === 'new').length;
-  const customBrandingCount = leads.filter(l => l.customBranding).length;
-  const totalUnits = leads.reduce((acc, l) => acc + (Number(l.quantity) || 0), 0);
-  const bulkOrdersCount = leads.filter(l => l.quantity >= 500).length;
+  const newLeadsCount = leads.filter(l => (l?.status || 'new') === 'new').length;
+  const customBrandingCount = leads.filter(l => Boolean(l?.customBranding)).length;
+  const totalUnits = leads.reduce((acc, l) => acc + (Number(l?.quantity) || 0), 0);
+  const bulkOrdersCount = leads.filter(l => (Number(l?.quantity) || 0) >= 500).length;
 
   return (
     <div className="min-h-screen bg-[#F6F5EF] text-[#1C1F1D] flex flex-col font-sans selection:bg-[#E2ECE3] selection:text-[#192E22]">
@@ -334,12 +408,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           <div className="bg-white p-4 rounded-xl border border-[#E3E1D7] shadow-xs">
             <div className="text-[11px] font-mono uppercase tracking-wider text-[#69726B] mb-1">
-              Client Requirements
+              Quotation Requests & Quotes
             </div>
             <div className="text-2xl font-serif font-bold text-[#192E22]">
               {totalLeads}
             </div>
-            <div className="text-[11px] text-stone-500 mt-1">Total inquiries & quotes</div>
+            <div className="text-[11px] text-stone-500 mt-1">Total customer quote requests</div>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-[#E3E1D7] shadow-xs relative overflow-hidden">
@@ -370,7 +444,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
             <div className="text-2xl font-serif font-bold text-[#192E22] tabular-nums">
               {totalUnits.toLocaleString()}
             </div>
-            <div className="text-[11px] text-stone-500 mt-1">Across all requirements</div>
+            <div className="text-[11px] text-stone-500 mt-1">Across all quotations</div>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-[#E3E1D7] shadow-xs col-span-2 sm:col-span-1">
@@ -396,7 +470,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
               }`}
             >
               <Package className="w-4 h-4 text-[#BD7B3C]" />
-              <span>Client Requirements & User Enquiries</span>
+              <span>Quotations & Client Quotes</span>
               <span className="bg-[#E7EFE9] text-[#192E22] text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">
                 {leads.length}
               </span>
@@ -424,6 +498,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
             >
               <KeyRound className="w-4 h-4 text-[#BD7B3C]" />
               <span>Security & Password</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('database')}
+              className={`px-4 py-3 text-xs sm:text-sm font-semibold tracking-wide border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'database'
+                  ? 'border-[#192E22] text-[#192E22] bg-[#FAF9F5]'
+                  : 'border-transparent text-[#626A65] hover:text-[#192E22]'
+              }`}
+            >
+              <Database className="w-4 h-4 text-[#2E7D4E]" />
+              <span>Supabase Database</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </button>
           </div>
 
@@ -569,12 +656,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                         };
 
                         const whatsAppUrl = buildWhatsAppUrl({
-                          productName: lead.productName,
-                          quantity: lead.quantity,
-                          customBranding: lead.customBranding,
-                          companyName: lead.company,
-                          senderName: lead.name,
-                          customQuery: `Hello ${lead.name}, thank you for contacting Earth Smile. We have reviewed your requirement for ${lead.quantity} units of ${lead.productName}${lead.customBranding ? ' with custom laser engraving' : ''}. Here is our quotation and production schedule.`,
+                          productName: lead.productName || 'Bamboo Toothbrush',
+                          quantity: Number(lead.quantity) || 50,
+                          customBranding: Boolean(lead.customBranding),
+                          companyName: lead.company || 'Practice',
+                          senderName: lead.name || 'Client',
+                          customQuery: `Hello ${lead.name || 'Client'}, thank you for contacting Earth Smile. We have reviewed your requirement for ${lead.quantity || 50} units of ${lead.productName || 'Bamboo Toothbrush'}${lead.customBranding ? ' with custom laser engraving' : ''}. Here is our quotation and production schedule.`,
                         });
 
                         return (
@@ -582,33 +669,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                             {/* Client & Organization */}
                             <td className="py-3.5 px-4 min-w-[190px]">
                               <div className="font-semibold text-[#192E22] text-sm">
-                                {lead.name}
+                                {lead.name || 'Anonymous Client'}
                               </div>
                               <div className="text-[11px] text-[#59635C] flex items-center gap-1 mt-0.5">
                                 <Building className="w-3 h-3 text-[#BD7B3C]" />
-                                <span className="font-medium truncate max-w-[170px]">{lead.company}</span>
+                                <span className="font-medium truncate max-w-[170px]">{lead.company || 'Direct Inquiry'}</span>
                               </div>
                               <div className="text-[10px] text-stone-400 flex items-center gap-1 mt-0.5 font-mono">
                                 <MapPin className="w-2.5 h-2.5" />
-                                <span>{lead.city}</span>
+                                <span>{lead.city || 'India'}</span>
                               </div>
+                              <span className="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                {lead.leadSource || 'Supabase DB'}
+                              </span>
                             </td>
 
                             {/* Product & Volume Requirement */}
                             <td className="py-3.5 px-4 min-w-[180px]">
                               <div className="font-medium text-[#192E22]">
-                                {lead.productName}
+                                {lead.productName || 'Bamboo Toothbrush'}
                               </div>
                               <div className="text-[11px] text-stone-600 font-mono mt-0.5 flex items-center gap-1.5">
-                                <strong className="text-[#192E22] font-bold text-xs">{lead.quantity.toLocaleString()}</strong> units
-                                {lead.quantity >= 500 && (
+                                <strong className="text-[#192E22] font-bold text-xs">{(Number(lead.quantity) || 50).toLocaleString()}</strong> units
+                                {(Number(lead.quantity) || 0) >= 500 && (
                                   <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-mono font-semibold">
                                     BULK
                                   </span>
                                 )}
                               </div>
                               <div className="text-[10px] text-stone-400 mt-0.5 font-mono">
-                                Recv: {new Date(lead.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                                Recv: {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}
                               </div>
                             </td>
 
@@ -899,6 +990,253 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                     Reset credentials to factory default
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: SUPABASE DATABASE INTEGRATION */}
+          {activeTab === 'database' && (
+            <div className="p-4 sm:p-6 space-y-6 max-w-4xl">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#ECEBE2]">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 font-bold">
+                      Supabase Cloud Connected
+                    </span>
+                  </div>
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#192E22]">
+                    Supabase Database Configuration
+                  </h3>
+                  <p className="text-xs text-stone-600 mt-1">
+                    Customer quotation submissions and inquiry forms are automatically saved to your Supabase PostgreSQL database.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={refreshLeads}
+                    disabled={isSyncing}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#192E22] bg-[#FAF9F5] hover:bg-[#EFECE3] border border-[#DDD9CE] rounded-lg transition-all cursor-pointer shadow-2xs disabled:opacity-60"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-[#BD7B3C] ${isSyncing ? 'animate-spin' : ''}`} />
+                    <span>{isSyncing ? 'Syncing...' : 'Sync From Supabase'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleTestSupabase}
+                    disabled={isTestingDb}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all cursor-pointer shadow-xs disabled:opacity-60"
+                  >
+                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{isTestingDb ? 'Testing...' : 'Test Connection'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Live Test Result Banner */}
+              {dbTestResult && (
+                <div
+                  className={`p-4 rounded-xl border text-xs flex items-start gap-3 ${
+                    dbTestResult.tableFound
+                      ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
+                      : dbTestResult.connected
+                      ? 'bg-amber-50/80 border-amber-200 text-amber-900'
+                      : 'bg-red-50/80 border-red-200 text-red-900'
+                  }`}
+                >
+                  <div className="mt-0.5 shrink-0">
+                    {dbTestResult.tableFound ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-amber-600" />
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-semibold">{dbTestResult.message}</p>
+                    {!dbTestResult.tableFound && (
+                      <p className="text-[11px] opacity-90 leading-relaxed">
+                        To enable persistent storage in Supabase, copy the SQL setup script below and execute it in your Supabase SQL Editor.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Active Connection Credentials */}
+              <div className="bg-[#FAF9F5] p-5 rounded-xl border border-[#E3E1D7] space-y-4">
+                <h4 className="font-serif text-sm font-bold text-[#192E22] flex items-center justify-between">
+                  <span>Connection Parameters</span>
+                  <span className="text-[11px] font-mono text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">
+                    Active & Configured
+                  </span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div className="bg-white p-3 rounded-lg border border-[#DDD9CE]">
+                    <span className="text-stone-400 block text-[10px] font-mono uppercase">Project ID</span>
+                    <span className="font-mono font-bold text-[#192E22] text-sm">{SUPABASE_PROJECT_ID}</span>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-lg border border-[#DDD9CE]">
+                    <span className="text-stone-400 block text-[10px] font-mono uppercase">Target Database Table</span>
+                    <span className="font-mono font-bold text-[#192E22] text-sm">public.quotations</span>
+                  </div>
+
+                  <div className="sm:col-span-2 bg-white p-3 rounded-lg border border-[#DDD9CE]">
+                    <span className="text-stone-400 block text-[10px] font-mono uppercase">Supabase REST Endpoint</span>
+                    <span className="font-mono text-stone-700 text-xs break-all">{SUPABASE_URL}</span>
+                  </div>
+
+                  <div className="sm:col-span-2 bg-white p-3 rounded-lg border border-[#DDD9CE]">
+                    <span className="text-stone-400 block text-[10px] font-mono uppercase">Publishable / Anon API Key</span>
+                    <span className="font-mono text-stone-600 text-xs break-all">{SUPABASE_ANON_KEY}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SQL Setup Script Box */}
+              <div className="bg-white p-5 rounded-xl border border-[#E3E1D7] space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-serif text-sm font-bold text-[#192E22]">
+                      Supabase SQL Table Schema & RLS Policies
+                    </h4>
+                    <p className="text-[11px] text-stone-500">
+                      Run this script once in your Supabase SQL Editor to initialize the <code className="text-[#192E22] font-semibold">quotations</code> table.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCopySql}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#192E22] bg-[#FAF9F5] hover:bg-[#EFECE3] border border-[#DDD9CE] rounded-lg transition-colors cursor-pointer shadow-2xs"
+                    >
+                      {copiedSql ? (
+                        <>
+                          <CheckCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          <span className="text-emerald-700">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-[#BD7B3C]" />
+                          <span>Copy SQL Script</span>
+                        </>
+                      )}
+                    </button>
+
+                    <a
+                      href={`https://supabase.com/dashboard/project/${SUPABASE_PROJECT_ID}/sql`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-colors cursor-pointer shadow-2xs"
+                    >
+                      <span>Open SQL Editor</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="relative rounded-lg overflow-hidden border border-stone-800 bg-[#161B18]">
+                  <div className="flex items-center justify-between px-3 py-1.5 bg-[#0F1311] border-b border-stone-800 text-[10px] text-stone-400 font-mono">
+                    <span>schema.sql</span>
+                    <span>PostgreSQL / Supabase</span>
+                  </div>
+                  <pre className="p-4 text-xs font-mono text-emerald-300/90 overflow-x-auto max-h-72 leading-relaxed">
+                    {SUPABASE_SQL_SETUP}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Direct Supabase Records Table */}
+              <div className="bg-white p-5 rounded-xl border border-[#E3E1D7] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-serif text-sm font-bold text-[#192E22] flex items-center gap-2">
+                      <span>Direct Database Records in Supabase (public.quotations)</span>
+                      <span className="bg-[#EAF2EC] text-[#192E22] text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">
+                        {supabaseQueries.length} Total
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-stone-500">
+                      Live records fetched directly from your Supabase PostgreSQL database.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={refreshLeads}
+                    disabled={isSyncing}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#192E22] bg-[#FAF9F5] hover:bg-[#EFECE3] border border-[#DDD9CE] rounded-lg transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-[#BD7B3C] ${isSyncing ? 'animate-spin' : ''}`} />
+                    <span>{isSyncing ? 'Refreshing...' : 'Refresh Records'}</span>
+                  </button>
+                </div>
+
+                {supabaseQueries.length === 0 ? (
+                  <div className="py-8 text-center bg-[#FAF9F5] rounded-lg border border-dashed border-[#DDD9CE] space-y-2">
+                    <p className="text-xs text-stone-600 font-medium">No quotations recorded in Supabase yet.</p>
+                    <p className="text-[11px] text-stone-400">
+                      When customers submit inquiries or quote requests, they will populate here in real time.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg border border-[#EAE8DE]">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] text-stone-500 font-mono text-[10px] uppercase border-b border-[#EAE8DE]">
+                          <th className="py-2.5 px-3">Client</th>
+                          <th className="py-2.5 px-3">Contact</th>
+                          <th className="py-2.5 px-3">Product</th>
+                          <th className="py-2.5 px-3">Quantity</th>
+                          <th className="py-2.5 px-3">Status</th>
+                          <th className="py-2.5 px-3">Date</th>
+                          <th className="py-2.5 px-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#EFECE4]">
+                        {supabaseQueries.map(q => (
+                          <tr key={q.id} className="hover:bg-[#FAF9F5]">
+                            <td className="py-2.5 px-3 font-semibold text-[#192E22]">
+                              <div>{q.name || 'Anonymous'}</div>
+                              <div className="text-[10px] text-stone-500 font-normal">{q.company || 'Direct'}</div>
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-stone-600">
+                              <div>{q.phone}</div>
+                              {q.email && <div className="text-[10px] text-stone-400 truncate max-w-[120px]">{q.email}</div>}
+                            </td>
+                            <td className="py-2.5 px-3 text-[#192E22] font-medium">
+                              {q.productName}
+                              {q.customBranding && (
+                                <span className="block text-[9px] text-[#BD7B3C] font-mono">Custom Laser</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-3 font-mono font-bold text-[#192E22]">
+                              {(Number(q.quantity) || 50).toLocaleString()}
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                                {q.status}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-stone-400 font-mono text-[10px]">
+                              {q.createdAt ? new Date(q.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'Recent'}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              <button
+                                onClick={() => setSelectedLead(q)}
+                                className="px-2 py-1 text-[11px] font-semibold text-[#192E22] bg-[#FAF9F5] hover:bg-stone-200 border border-stone-300 rounded cursor-pointer"
+                              >
+                                View Dossier
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           )}

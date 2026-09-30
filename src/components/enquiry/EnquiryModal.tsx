@@ -57,27 +57,28 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!formData.name.trim()) errs.name = 'Full name is required';
-    if (!formData.phone.trim() || formData.phone.length < 10) {
-      errs.phone = 'Valid 10-digit mobile number is required';
+    if (!formData.name.trim()) errs.name = 'Contact name is required';
+    const digitsOnly = formData.phone.replace(/[^0-9]/g, '');
+    if (!formData.phone.trim() || digitsOnly.length < 6) {
+      errs.phone = 'Valid phone or WhatsApp number is required';
     }
-    if (!formData.email.trim() || !formData.email.includes('@')) {
-      errs.email = 'Valid corporate or personal email required';
+    if (formData.email.trim() && !formData.email.includes('@')) {
+      errs.email = 'Valid email address format required';
     }
-    if (formData.quantity < 20) {
-      errs.quantity = 'Minimum batch quantity is 20 units';
+    if (formData.quantity < 1) {
+      errs.quantity = 'Minimum batch quantity is 1 unit';
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const newLead = leadService.submitLead({
+    try {
+      const newLead = await leadService.submitLeadAsync({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
         email: formData.email.trim(),
@@ -92,8 +93,11 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
       });
 
       setSubmittedLead(newLead);
+    } catch (err) {
+      console.error('Failed to submit quote request:', err);
+    } finally {
       setIsSubmitting(false);
-    }, 400);
+    }
   };
 
   const whatsAppDirectUrl = buildWhatsAppUrl({
@@ -147,9 +151,15 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
               <div className="w-14 h-14 rounded-full bg-[#EAF2EC] text-[#2E7D4E] flex items-center justify-center mx-auto">
                 <CheckCircle className="w-8 h-8" />
               </div>
-              <h3 className="font-serif text-2xl font-bold text-[#142018]">
-                Enquiry Successfully Registered
-              </h3>
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100/70 text-emerald-800 text-[11px] font-mono font-semibold rounded-full mb-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  Stored in Supabase Database
+                </span>
+                <h3 className="font-serif text-2xl font-bold text-[#142018]">
+                  Enquiry Successfully Registered
+                </h3>
+              </div>
               <p className="text-xs sm:text-sm text-[#555E59] max-w-md mx-auto leading-relaxed">
                 Thank you, <strong>{submittedLead.name}</strong>. Reference ID: <span className="font-mono text-[#BD7B3C]">{submittedLead.id}</span>. Our corporate desk has received your request for <strong>{submittedLead.quantity} units of {submittedLead.productName}</strong>.
               </p>
