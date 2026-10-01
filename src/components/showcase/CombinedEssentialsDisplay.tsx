@@ -375,7 +375,7 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
                   `Complete Care Combo (Toothbrush + Tongue Cleaner + Seed Balls) - Logo: ${logoText}`
                 )
               }
-              className="flex-1 min-w-[170px] py-3.5 px-6 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all shadow-xs text-center uppercase tracking-wider cursor-pointer"
+              className="flex-1 min-w-[170px] py-3.5 px-6 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all duration-300 shadow-md hover:shadow-xl hover:scale-102 active:scale-98 text-center uppercase tracking-wider cursor-pointer card-shine-hover"
             >
               GET COMBO QUOTE (FROM ₹99/PC)
             </button>
@@ -386,14 +386,14 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
               rel="noopener noreferrer"
               title="Direct WhatsApp"
               aria-label="Direct WhatsApp"
-              className="w-12 h-12 shrink-0 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95"
+              className="w-12 h-12 shrink-0 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-lg transition-all duration-300 flex items-center justify-center cursor-pointer shadow-md hover:shadow-xl hover:scale-110 active:scale-95 group"
             >
-              <WhatsAppIcon className="w-6 h-6 fill-white" />
+              <WhatsAppIcon className="w-6 h-6 fill-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
             </a>
 
             <button
               onClick={() => onSelectProduct('bamboo-dental-combo')}
-              className="py-3.5 px-3 text-xs font-semibold text-[#5A635E] hover:text-[#192E22] transition-colors cursor-pointer"
+              className="py-3.5 px-3 text-xs font-semibold text-[#5A635E] hover:text-[#192E22] transition-colors cursor-pointer hover:underline"
             >
               Full Specs →
             </button>

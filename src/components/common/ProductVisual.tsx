@@ -118,19 +118,25 @@ export const ProductVisual: React.FC<ProductVisualProps> = ({
             {/* Live Laser Engraving Simulation Overlay */}
             {showCustomBranding && (customLogoText || customLogoImage) && (
               <div
-                className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-[#EADCC8]/90 backdrop-blur-xs border border-[#C5B498] shadow-lg pointer-events-none transition-all duration-300 max-w-[85%]"
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-[#EADCC8]/90 backdrop-blur-xs border border-[#C5B498] shadow-lg pointer-events-none transition-all duration-300 max-w-[85%] overflow-hidden"
                 style={{ transform: 'translateZ(30px)' }}
               >
-                <div className="flex items-center gap-2.5">
+                {/* Animated sweeping laser beam */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-amber-400/50 to-transparent animate-laser-sweep" />
+                </div>
+
+                <div className="flex items-center gap-2.5 relative z-10">
                   {customLogoImage ? (
                     <img
                       src={customLogoImage}
                       alt="Custom Brand Logo"
-                      className="h-7 max-w-[120px] object-contain mix-blend-multiply opacity-90 drop-shadow-xs filter contrast-125"
+                      className="h-7 max-w-[120px] object-contain mix-blend-multiply opacity-90 drop-shadow-xs filter contrast-125 transition-transform duration-300 hover:scale-105"
                     />
                   ) : (
                     <div className="flex flex-col items-center">
-                      <span className="text-[9px] tracking-widest uppercase font-mono text-[#745B41]">
+                      <span className="text-[9px] tracking-widest uppercase font-mono text-[#745B41] flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                         Laser Engraved
                       </span>
                       <span className={`font-serif italic font-semibold text-sm tracking-wider ${toneColors[engravingTone]} drop-shadow-xs`}>

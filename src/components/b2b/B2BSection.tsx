@@ -112,8 +112,9 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
           <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
           {/* Section Header */}
-          <div className="max-w-3xl mb-10 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100/80 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 text-xs font-mono font-semibold rounded-full mb-3 border border-emerald-300 dark:border-emerald-800">
+          <div className="max-w-3xl mb-8 relative z-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-100/90 dark:bg-emerald-950/90 text-emerald-900 dark:text-emerald-300 text-xs font-mono font-semibold rounded-full mb-3 border border-emerald-300 dark:border-emerald-800 animate-float-gentle">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
               <span>🌱 Earth Smile — B2B Price List</span>
             </div>
             
@@ -126,25 +127,78 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
             </p>
           </div>
 
+          {/* Interactive Tier Switcher Pills with animated indicator */}
+          <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
+            <span className="text-xs font-mono font-semibold text-stone-500 uppercase tracking-wider whitespace-nowrap mr-1">
+              Select Volume Tier:
+            </span>
+            {priceTiers.map((tier, tIdx) => (
+              <button
+                key={tIdx}
+                onClick={() => setSelectedTierIndex(tIdx)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-mono transition-all duration-300 whitespace-nowrap cursor-pointer flex items-center gap-2 ${
+                  selectedTierIndex === tIdx
+                    ? 'bg-[#192E22] text-white shadow-md scale-105 ring-2 ring-emerald-400/50'
+                    : 'bg-stone-100 dark:bg-[#1B2F23] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-[#233C2D]'
+                }`}
+              >
+                <span>{tier.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                  selectedTierIndex === tIdx ? 'bg-emerald-500 text-white font-bold' : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
+                }`}>
+                  {tier.badge}
+                </span>
+              </button>
+            ))}
+          </div>
+
           {/* Desktop & Tablet Pricing Table */}
           <div className="overflow-x-auto rounded-2xl border border-[#E3E1D7] dark:border-[#2A4434] shadow-xs mb-8">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#FAF9F5] dark:bg-[#182C22] text-[#4F5953] dark:text-[#BACBC0] font-mono text-xs uppercase tracking-wider border-b border-[#E3E1D7] dark:border-[#2A4434]">
                   <th className="py-4 px-5 font-semibold">Product</th>
-                  <th className="py-4 px-4 text-center font-semibold bg-[#F2F1EA]/60 dark:bg-[#1B3126]/60">
+                  <th
+                    onClick={() => setSelectedTierIndex(0)}
+                    className={`py-4 px-4 text-center font-semibold transition-all duration-300 cursor-pointer ${
+                      selectedTierIndex === 0
+                        ? 'bg-emerald-100/70 dark:bg-emerald-950/70 text-emerald-950 dark:text-emerald-200 ring-2 ring-emerald-500/50'
+                        : 'bg-[#F2F1EA]/60 dark:bg-[#1B3126]/60 hover:bg-stone-200/60'
+                    }`}
+                  >
                     <div>200–499 pcs</div>
                     <span className="text-[10px] font-normal text-[#8A958E] dark:text-[#889B8F] normal-case">MOQ Tier</span>
                   </th>
-                  <th className="py-4 px-4 text-center font-semibold">
+                  <th
+                    onClick={() => setSelectedTierIndex(1)}
+                    className={`py-4 px-4 text-center font-semibold transition-all duration-300 cursor-pointer ${
+                      selectedTierIndex === 1
+                        ? 'bg-emerald-100/70 dark:bg-emerald-950/70 text-emerald-950 dark:text-emerald-200 ring-2 ring-emerald-500/50'
+                        : 'hover:bg-stone-100 dark:hover:bg-stone-800/40'
+                    }`}
+                  >
                     <div>500–999 pcs</div>
                     <span className="text-[10px] font-normal text-emerald-700 dark:text-emerald-400 normal-case">Volume Discount</span>
                   </th>
-                  <th className="py-4 px-4 text-center font-semibold bg-[#EAF2EC]/70 dark:bg-[#1E382A]/70 text-[#192E22] dark:text-emerald-300">
+                  <th
+                    onClick={() => setSelectedTierIndex(2)}
+                    className={`py-4 px-4 text-center font-semibold transition-all duration-300 cursor-pointer ${
+                      selectedTierIndex === 2
+                        ? 'bg-emerald-100/70 dark:bg-emerald-950/70 text-emerald-950 dark:text-emerald-200 ring-2 ring-emerald-500/50'
+                        : 'bg-[#EAF2EC]/70 dark:bg-[#1E382A]/70 text-[#192E22] dark:text-emerald-300 hover:bg-emerald-200/50'
+                    }`}
+                  >
                     <div>1,000–4,999 pcs</div>
                     <span className="text-[10px] font-normal text-emerald-800 dark:text-emerald-400 normal-case">Wholesale Pro</span>
                   </th>
-                  <th className="py-4 px-5 text-center font-semibold text-[#BD7B3C] dark:text-[#DE9B5E]">
+                  <th
+                    onClick={() => setSelectedTierIndex(3)}
+                    className={`py-4 px-5 text-center font-semibold text-[#BD7B3C] dark:text-[#DE9B5E] transition-all duration-300 cursor-pointer ${
+                      selectedTierIndex === 3
+                        ? 'bg-amber-100/70 dark:bg-amber-950/50 ring-2 ring-amber-500/50'
+                        : 'hover:bg-amber-50/50'
+                    }`}
+                  >
                     <div>5,000+ pcs</div>
                     <span className="text-[10px] font-normal text-[#BD7B3C] dark:text-[#DE9B5E] normal-case">Factory Level</span>
                   </th>
@@ -153,18 +207,18 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
               </thead>
               <tbody className="divide-y divide-[#EAE8DE] dark:divide-[#243B2C] text-xs sm:text-sm">
                 {pricingProducts.map((p, idx) => (
-                  <tr key={idx} className="hover:bg-[#FAF9F5] dark:hover:bg-[#17281F] transition-colors">
+                  <tr key={idx} className="hover:bg-[#FAF9F5] dark:hover:bg-[#17281F] transition-colors group">
                     {/* Product Name & Details */}
                     <td className="py-5 px-5">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl shrink-0" role="img" aria-label={p.name}>{p.emoji}</span>
+                        <span className="text-2xl shrink-0 transition-transform duration-300 group-hover:scale-125" role="img" aria-label={p.name}>{p.emoji}</span>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-serif font-bold text-sm sm:text-base text-[#192E22] dark:text-white">
                               {p.name}
                             </span>
                             {p.badge && (
-                              <span className="text-[10px] font-mono font-bold bg-[#DE9B5E]/20 text-[#8C521B] dark:text-[#DE9B5E] px-2 py-0.5 rounded-full border border-[#DE9B5E]/40">
+                              <span className="text-[10px] font-mono font-bold bg-[#DE9B5E]/20 text-[#8C521B] dark:text-[#DE9B5E] px-2 py-0.5 rounded-full border border-[#DE9B5E]/40 animate-pulse">
                                 {p.badge}
                               </span>
                             )}
@@ -177,23 +231,37 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
                     </td>
 
                     {/* 200–499 pcs */}
-                    <td className="py-5 px-4 text-center font-mono font-semibold text-[#192E22] dark:text-white bg-[#F2F1EA]/30 dark:bg-[#1B3126]/30">
+                    <td className={`py-5 px-4 text-center font-mono font-semibold transition-all duration-300 ${
+                      selectedTierIndex === 0
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100 font-extrabold scale-105'
+                        : 'text-[#192E22] dark:text-white bg-[#F2F1EA]/30 dark:bg-[#1B3126]/30'
+                    }`}>
                       <span className="text-base font-bold text-[#192E22] dark:text-white">{p.rates[0]}</span>
                     </td>
 
                     {/* 500–999 pcs */}
-                    <td className="py-5 px-4 text-center font-mono font-semibold text-emerald-800 dark:text-emerald-300">
+                    <td className={`py-5 px-4 text-center font-mono font-semibold transition-all duration-300 ${
+                      selectedTierIndex === 1
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100 font-extrabold scale-105'
+                        : 'text-emerald-800 dark:text-emerald-300'
+                    }`}>
                       <span className="text-base font-bold">{p.rates[1]}</span>
                     </td>
 
                     {/* 1,000–4,999 pcs */}
-                    <td className="py-5 px-4 text-center font-mono font-semibold text-emerald-950 dark:text-emerald-200 bg-[#EAF2EC]/40 dark:bg-[#1E382A]/40">
+                    <td className={`py-5 px-4 text-center font-mono font-semibold transition-all duration-300 ${
+                      selectedTierIndex === 2
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100 font-extrabold scale-105'
+                        : 'text-emerald-950 dark:text-emerald-200 bg-[#EAF2EC]/40 dark:bg-[#1E382A]/40'
+                    }`}>
                       <span className="text-base font-extrabold text-[#192E22] dark:text-emerald-300">{p.rates[2]}</span>
                     </td>
 
                     {/* 5,000+ pcs */}
-                    <td className="py-5 px-5 text-center font-mono text-xs">
-                      <span className="inline-block px-2.5 py-1 bg-[#F9F1E6] dark:bg-[#2C2317] text-[#9A6028] dark:text-[#E0A361] rounded-lg font-bold border border-[#E9D7C2] dark:border-[#423420]">
+                    <td className={`py-5 px-5 text-center font-mono text-xs transition-all duration-300 ${
+                      selectedTierIndex === 3 ? 'bg-amber-50 dark:bg-amber-950/30 scale-105' : ''
+                    }`}>
+                      <span className="inline-block px-2.5 py-1 bg-[#F9F1E6] dark:bg-[#2C2317] text-[#9A6028] dark:text-[#E0A361] rounded-lg font-bold border border-[#E9D7C2] dark:border-[#423420] transition-transform duration-300 hover:scale-105">
                         {p.rates[3]}
                       </span>
                     </td>
@@ -202,7 +270,7 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
                     <td className="py-5 px-4 text-right">
                       <button
                         onClick={() => onOpenEnquiry(p.actionQuery)}
-                        className="py-2 px-3.5 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#264432] rounded-lg transition-all shadow-2xs whitespace-nowrap cursor-pointer hover:scale-102"
+                        className="py-2 px-3.5 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#264432] rounded-lg transition-all duration-300 shadow-2xs whitespace-nowrap cursor-pointer hover:scale-105 active:scale-95 card-shine-hover"
                       >
                         Enquire →
                       </button>
@@ -216,15 +284,22 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
           {/* ======================================================== */}
           {/* COMPLETE CARE COMBO SPOTLIGHT BANNER                     */}
           {/* ======================================================== */}
-          <div className="bg-[#FAF9F5] dark:bg-[#182C22] border-2 border-emerald-600/30 dark:border-emerald-500/30 rounded-2xl p-6 sm:p-8 mb-10 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xs">
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🌿</span>
+          <div className="bg-[#FAF9F5] dark:bg-[#182C22] border-2 border-emerald-600/30 dark:border-emerald-500/30 rounded-2xl p-6 sm:p-8 mb-10 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xs relative overflow-hidden group hover:border-emerald-600/60 transition-all duration-300 card-shine-hover">
+            {/* Ambient emerald pulse */}
+            <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-500" />
+
+            <div className="flex-1 space-y-2 relative z-10">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xl animate-botanical-sway inline-block">🌿</span>
                 <span className="text-xs uppercase font-mono font-bold tracking-wider text-emerald-800 dark:text-emerald-300">
                   Featured Eco-Solution
                 </span>
-                <span className="text-[10px] font-mono bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[10px] font-mono bg-emerald-100 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   Zero Single-Use Plastic
+                </span>
+                <span className="text-[10px] font-mono bg-amber-100/80 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 px-2 py-0.5 rounded-full font-bold border border-amber-300/40">
+                  🌱 Includes Plantable Seed Balls
                 </span>
               </div>
 
@@ -232,8 +307,8 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
                 Complete Care Combo
               </h3>
 
-              <div className="text-xs font-mono font-bold text-[#BD7B3C] dark:text-[#DE9B5E]">
-                Bamboo Toothbrush + Bamboo Tongue Cleaner + Plantable Seed Balls
+              <div className="text-xs font-mono font-bold text-[#BD7B3C] dark:text-[#DE9B5E] flex items-center gap-2">
+                <span>Bamboo Toothbrush + Bamboo Tongue Cleaner + Plantable Seed Balls</span>
               </div>
 
               <p className="text-xs sm:text-sm text-[#525B55] dark:text-[#BACBC0] leading-relaxed max-w-2xl">
@@ -241,20 +316,20 @@ export const B2BSection: React.FC<B2BSectionProps> = ({ onOpenEnquiry, onOpenBra
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto shrink-0 relative z-10">
               <button
                 onClick={() => onOpenEnquiry('Complete Care Combo (Toothbrush + Tongue Cleaner + Seed Balls)')}
-                className="w-full sm:w-auto py-3.5 px-6 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+                className="w-full sm:w-auto py-3.5 px-6 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap card-shine-hover"
               >
                 <span>Request Combo Quote</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
               </button>
 
               <button
                 onClick={onOpenBrandingStudio}
-                className="w-full sm:w-auto py-3.5 px-5 text-xs font-semibold text-[#192E22] dark:text-white bg-white dark:bg-[#1E362A] border border-[#CCDDCF] dark:border-[#31563E] rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="w-full sm:w-auto py-3.5 px-5 text-xs font-semibold text-[#192E22] dark:text-white bg-white dark:bg-[#1E362A] border border-[#CCDDCF] dark:border-[#31563E] rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shadow-xs hover:shadow-md"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#BD7B3C]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#BD7B3C] animate-pulse" />
                 <span>Preview Logo on Combo</span>
               </button>
             </div>

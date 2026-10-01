@@ -61,13 +61,14 @@ export const Hero: React.FC<HeroProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Editorial Headline & Messaging */}
           <div className="lg:col-span-7 flex flex-col items-start">
-            {/* Quiet unboxed kicker */}
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#2E4A37] mb-4">
+            {/* Quiet unboxed kicker with animated botanical sway */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100/70 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800 text-xs font-semibold uppercase tracking-widest text-[#2E4A37] dark:text-emerald-300 mb-4 animate-float-gentle">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Pure Moso Bamboo</span>
               <span aria-hidden="true">·</span>
-              <span>Toothbrushes & Tongue Cleaners</span>
+              <span>Toothbrushes & Cleaners</span>
               <span aria-hidden="true">·</span>
-              <span>Pre-Print Logo Preview</span>
+              <span className="text-[#BD7B3C] font-mono">MOQ 200 pcs</span>
             </div>
 
             {/* Headline */}
@@ -81,38 +82,38 @@ export const Hero: React.FC<HeroProps> = ({
               Thoughtfully designed bamboo dental essentials for everyday oral care and conscious living.
             </p>
 
-            {/* Action buttons */}
+            {/* Action buttons with shine hover & scale micro-interactions */}
             <div className="flex flex-wrap items-center gap-4 mb-10 w-full sm:w-auto">
               <button
                 onClick={onExploreProducts}
-                className="w-full sm:w-auto px-7 py-3.5 text-xs sm:text-sm font-semibold text-white bg-[#192E22] hover:bg-[#274433] rounded-lg transition-all duration-200 shadow-sm flex items-center justify-center gap-2 group cursor-pointer tracking-wider uppercase"
+                className="w-full sm:w-auto px-7 py-3.5 text-xs sm:text-sm font-semibold text-white bg-[#192E22] hover:bg-[#274433] rounded-lg transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 active:scale-95 flex items-center justify-center gap-2 group cursor-pointer tracking-wider uppercase card-shine-hover"
               >
                 <span>EXPLORE PRODUCTS</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
               </button>
 
               <button
                 onClick={onExploreBranding}
-                className="w-full sm:w-auto px-6 py-3.5 text-xs sm:text-sm font-semibold text-[#192E22] bg-[#F0EFE8] hover:bg-[#E7E5DC] border border-[#DDDCD3] rounded-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer tracking-wider uppercase"
+                className="w-full sm:w-auto px-6 py-3.5 text-xs sm:text-sm font-semibold text-[#192E22] bg-[#F0EFE8] hover:bg-[#E7E5DC] border border-[#DDDCD3] rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer tracking-wider uppercase shadow-xs hover:shadow-md"
               >
-                <Sparkles className="w-4 h-4 text-[#BD7B3C]" />
+                <Sparkles className="w-4 h-4 text-[#BD7B3C] transition-transform duration-300 group-hover:rotate-12 animate-pulse" />
                 <span>CUSTOM BRANDING</span>
               </button>
             </div>
 
-            {/* Quiet Trust & Claim-to-Proof Row */}
+            {/* Quiet Trust & Claim-to-Proof Row with subtle hover lift */}
             <div className="pt-6 border-t border-[#EAE9E1] grid grid-cols-3 gap-6 w-full max-w-lg">
-              <div>
+              <div className="transition-transform duration-300 hover:scale-105">
                 <p className="text-xl md:text-2xl font-serif font-bold text-[#192E22] tabular-nums">100%</p>
                 <p className="text-xs text-[#606963] mt-0.5">Organic Moso bamboo</p>
               </div>
-              <div>
+              <div className="transition-transform duration-300 hover:scale-105">
                 <p className="text-xl md:text-2xl font-serif font-bold text-[#192E22] tabular-nums">0%</p>
                 <p className="text-xs text-[#606963] mt-0.5">Zero plastic handles</p>
               </div>
-              <div>
-                <p className="text-xl md:text-2xl font-serif font-bold text-[#192E22] tabular-nums">Together</p>
-                <p className="text-xs text-[#606963] mt-0.5">Toothbrush & Cleaner</p>
+              <div className="transition-transform duration-300 hover:scale-105">
+                <p className="text-xl md:text-2xl font-serif font-bold text-[#192E22] tabular-nums">200 pcs</p>
+                <p className="text-xs text-[#606963] mt-0.5">Standard Bulk MOQ</p>
               </div>
             </div>
           </div>

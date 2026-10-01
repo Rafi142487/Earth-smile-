@@ -161,7 +161,7 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onOpenEnquiry(product.name)}
-                      className="flex-1 py-2.5 px-3 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all text-center cursor-pointer shadow-xs uppercase tracking-wider"
+                      className="flex-1 py-2.5 px-3 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all duration-300 text-center cursor-pointer shadow-xs hover:shadow-md hover:scale-102 active:scale-98 uppercase tracking-wider card-shine-hover"
                     >
                       GET A QUOTE
                     </button>
@@ -177,9 +177,9 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({
                       rel="noopener noreferrer"
                       title="Direct WhatsApp"
                       aria-label="Direct WhatsApp"
-                      className="w-10 h-10 shrink-0 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95"
+                      className="w-10 h-10 shrink-0 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-lg transition-all duration-300 flex items-center justify-center cursor-pointer shadow-xs hover:shadow-md hover:scale-110 active:scale-95 group"
                     >
-                      <WhatsAppIcon className="w-5 h-5 fill-white" />
+                      <WhatsAppIcon className="w-5 h-5 fill-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
                     </a>
                   </div>
                 </div>
