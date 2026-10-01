@@ -90,3 +90,60 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #3E634B;
 }
+
+/* Accessibility Focus Ring Standards */
+:focus-visible {
+  outline: 2px solid #2E7D4E;
+  outline-offset: 2px;
+}
+
+/* Print Stylesheet for Official B2B Catalog & Quotations */
+@media print {
+  /* Hide non-printable navigation, interactive triggers, and floating elements */
+  nav,
+  header,
+  .no-print,
+  button:not(.print-include),
+  .floating-widget,
+  [role="dialog"]:not(.print-modal),
+  aside,
+  input,
+  textarea,
+  select {
+    display: none !important;
+  }
+
+  body {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Ensure high contrast and page-break rules */
+  a {
+    text-decoration: underline !important;
+    color: #000000 !important;
+  }
+
+  .print-page-break {
+    page-break-before: always;
+  }
+
+  .print-break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Show print watermark/header */
+  body::before {
+    content: "EARTH SMILE ECO INNOVATIONS PVT. LTD. • COMMERCIAL CATALOG & SPECIFICATIONS • +91 94838 72778";
+    display: block;
+    text-align: center;
+    font-size: 8pt;
+    font-family: monospace;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #CCCCCC;
+  }
+}

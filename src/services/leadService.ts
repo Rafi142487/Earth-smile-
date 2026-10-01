@@ -1,13 +1,14 @@
 import { LeadEnquiry } from '../types';
 import { supabaseService } from './supabaseService';
+import { calculateQuotePricing } from '../utils/quotePricing';
 
-const LEADS_STORAGE_KEY = 'earthsmile_leads_v3';
+const LEADS_STORAGE_KEY = 'earthsmile_leads_v4';
 
-// Baseline default inquiries to ensure the Quotation Management dashboard is never empty
+// Sample fallback inquiries only used if the database and storage are completely empty
 const INITIAL_LEADS: LeadEnquiry[] = [
   {
     id: 'quote-apollo-101',
-    createdAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+    createdAt: '2026-09-25T10:30:00.000Z',
     name: 'Dr. Rajesh Malhotra',
     phone: '+91 98112 34567',
     email: 'procurement@apollohealth.org',
@@ -24,7 +25,7 @@ const INITIAL_LEADS: LeadEnquiry[] = [
   },
   {
     id: 'quote-clove-102',
-    createdAt: new Date(Date.now() - 1000 * 60 * 140).toISOString(),
+    createdAt: '2026-09-24T14:15:00.000Z',
     name: 'Pooja Venkatesh',
     phone: '+91 99401 88765',
     email: 'pooja.v@clovedental.in',
@@ -39,69 +40,62 @@ const INITIAL_LEADS: LeadEnquiry[] = [
     status: 'quoted',
     adminNotes: 'Sample boxes dispatched via courier. Follow-up scheduled for this Friday.',
   },
-  {
-    id: 'quote-sharma-103',
-    createdAt: new Date(Date.now() - 1000 * 60 * 320).toISOString(),
-    name: 'Dr. Sharma',
-    phone: '+91 98765 43210',
-    email: 'contact@sharmadental.com',
-    company: 'Dr. Sharma Multi-Speciality Clinic',
-    city: 'New Delhi',
-    productName: 'Ergonomic Bamboo Tongue Cleaner',
-    quantity: 300,
-    customBranding: false,
-    brandingDetails: '',
-    message: 'Interested in counter-top display packaging and patient giveaways. Please provide tier pricing.',
-    leadSource: 'Direct Website Quote',
-    status: 'contacted',
-    adminNotes: 'Discussed volume discount schedule on telephone.',
-  },
-  {
-    id: 'quote-greenroots-104',
-    createdAt: new Date(Date.now() - 1000 * 60 * 600).toISOString(),
-    name: 'Vikram Singhania',
-    phone: '+91 97118 90214',
-    email: 'vikram@greenrootsorganic.com',
-    company: 'GreenRoots Eco Stores',
-    city: 'Hyderabad, Telangana',
-    productName: 'Eco-Dentist Pro Bamboo Toothbrush',
-    quantity: 2000,
-    customBranding: true,
-    brandingDetails: 'GreenRoots Life',
-    message: 'Looking for bulk wholesale distributor agreement for south zone retail outlets.',
-    leadSource: 'B2B Wholesale Portal',
-    status: 'new',
-    adminNotes: 'Commercial retail query. Awaiting MOA sign-off.',
-  }
 ];
+
+const isDummyLead = (id?: string) => {
+  if (!id) return false;
+  return id.startsWith('quote-apollo') || id.startsWith('quote-clove') || id.startsWith('quote-sharma') || id.startsWith('quote-greenroots');
+};
+
+const enrichLead = (lead: LeadEnquiry): LeadEnquiry => {
+  const pricing = calculateQuotePricing(lead);
+  return {
+    ...lead,
+    estimatedValue: lead.estimatedValue || pricing.grandTotal,
+  };
+};
+
+const safeGetStorage = (key: string): string | null => {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeSetStorage = (key: string, value: string): void => {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore in restricted envs
+  }
+};
 
 export const leadService = {
   getLeads(): LeadEnquiry[] {
     try {
-      const keys = ['earthsmile_leads_v3', 'earthsmile_leads_v2', 'earthsmile_leads_v1', 'earthsmile_leads'];
+      const keys = ['earthsmile_leads_v4', 'earthsmile_leads_v3', 'earthsmile_leads_v2', 'earthsmile_leads_v1', 'earthsmile_leads'];
       for (const k of keys) {
-        const stored = localStorage.getItem(k);
+        const stored = safeGetStorage(k);
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Merge with initial leads so baseline is preserved
-            const idMap = new Map<string, LeadEnquiry>();
-            for (const item of INITIAL_LEADS) {
-              idMap.set(item.id, item);
-            }
-            for (const item of parsed) {
-              if (item && item.id) idMap.set(item.id, item);
-            }
-            return Array.from(idMap.values()).sort(
-              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
+            const valid = parsed.filter(item => item && item.id);
+            // If we have real leads, filter out mock dummy leads
+            const realLeads = valid.filter(item => !isDummyLead(item.id));
+            const listToReturn = realLeads.length > 0 ? realLeads : valid;
+
+            return listToReturn
+              .map(enrichLead)
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           }
         }
       }
-      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(INITIAL_LEADS));
-      return INITIAL_LEADS;
+      return INITIAL_LEADS.map(enrichLead);
     } catch {
-      return INITIAL_LEADS;
+      return INITIAL_LEADS.map(enrichLead);
     }
   },
 
@@ -109,20 +103,19 @@ export const leadService = {
    * Submit lead: Saves to local storage AND syncs to Supabase
    */
   submitLead(leadData: Omit<LeadEnquiry, 'id' | 'createdAt' | 'status'>): LeadEnquiry {
-    const leads = this.getLeads();
+    const leads = this.getLeads().filter(l => !isDummyLead(l.id));
+    const pricing = calculateQuotePricing(leadData);
+
     const newLead: LeadEnquiry = {
       ...leadData,
       id: `lead-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       createdAt: new Date().toISOString(),
       status: 'new',
+      estimatedValue: pricing.grandTotal,
     };
 
     const updated = [newLead, ...leads];
-    try {
-      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.warn('Failed to persist lead locally', e);
-    }
+    safeSetStorage(LEADS_STORAGE_KEY, JSON.stringify(updated));
 
     // Sync to Supabase in background
     supabaseService.saveQuotation(newLead).then(res => {
@@ -140,20 +133,19 @@ export const leadService = {
    * Async submit lead: Awaits Supabase save before returning
    */
   async submitLeadAsync(leadData: Omit<LeadEnquiry, 'id' | 'createdAt' | 'status'>): Promise<LeadEnquiry> {
-    const leads = this.getLeads();
+    const leads = this.getLeads().filter(l => !isDummyLead(l.id));
+    const pricing = calculateQuotePricing(leadData);
+
     const newLead: LeadEnquiry = {
       ...leadData,
       id: `lead-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       createdAt: new Date().toISOString(),
       status: 'new',
+      estimatedValue: pricing.grandTotal,
     };
 
     const updated = [newLead, ...leads];
-    try {
-      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.warn('Failed to persist lead locally', e);
-    }
+    safeSetStorage(LEADS_STORAGE_KEY, JSON.stringify(updated));
 
     try {
       await supabaseService.saveQuotation(newLead);
@@ -171,25 +163,29 @@ export const leadService = {
     const local = this.getLeads();
     const remote = await supabaseService.fetchQuotations();
 
-    if (remote.success && Array.isArray(remote.data)) {
-      // Merge by ID, preferring remote updates
+    if (remote.success && Array.isArray(remote.data) && remote.data.length > 0) {
+      // Remote Supabase has live customer quotes!
       const idMap = new Map<string, LeadEnquiry>();
+
+      // Keep real non-dummy local leads
       for (const item of local) {
-        if (item && item.id) idMap.set(item.id, item);
+        if (item && item.id && !isDummyLead(item.id)) {
+          idMap.set(item.id, enrichLead(item));
+        }
       }
+
+      // Add remote quotations from Supabase
       for (const item of remote.data) {
-        if (item && item.id) idMap.set(item.id, item);
+        if (item && item.id && !isDummyLead(item.id)) {
+          idMap.set(item.id, enrichLead(item));
+        }
       }
 
       const merged = Array.from(idMap.values()).sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
-      try {
-        localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(merged));
-      } catch (e) {
-        console.warn(e);
-      }
+      safeSetStorage(LEADS_STORAGE_KEY, JSON.stringify(merged));
       return merged;
     }
 
@@ -199,11 +195,7 @@ export const leadService = {
   updateLeadStatus(id: string, status: LeadEnquiry['status']): LeadEnquiry[] {
     const leads = this.getLeads();
     const updated = leads.map(lead => (lead.id === id ? { ...lead, status } : lead));
-    try {
-      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.warn(e);
-    }
+    safeSetStorage(LEADS_STORAGE_KEY, JSON.stringify(updated));
 
     // Sync to Supabase
     supabaseService.updateStatus(id, status);
@@ -213,11 +205,7 @@ export const leadService = {
   updateLeadNotes(id: string, adminNotes: string): LeadEnquiry[] {
     const leads = this.getLeads();
     const updated = leads.map(lead => (lead.id === id ? { ...lead, adminNotes } : lead));
-    try {
-      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.warn(e);
-    }
+    safeSetStorage(LEADS_STORAGE_KEY, JSON.stringify(updated));
 
     // Sync to Supabase
     supabaseService.updateNotes(id, adminNotes);
@@ -227,11 +215,7 @@ export const leadService = {
   deleteLead(id: string): LeadEnquiry[] {
     const leads = this.getLeads();
     const updated = leads.filter(l => l.id !== id);
-    try {
-      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(updated));
-    } catch (e) {
-      console.warn(e);
-    }
+    safeSetStorage(LEADS_STORAGE_KEY, JSON.stringify(updated));
 
     // Sync to Supabase
     supabaseService.deleteQuotation(id);
@@ -239,11 +223,7 @@ export const leadService = {
   },
 
   clearAllLeads(): LeadEnquiry[] {
-    try {
-      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify([]));
-    } catch (e) {
-      console.warn(e);
-    }
+    safeSetStorage(LEADS_STORAGE_KEY, JSON.stringify([]));
     return [];
   },
 };

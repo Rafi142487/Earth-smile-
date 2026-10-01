@@ -67,6 +67,9 @@ export interface LeadEnquiry {
   status: 'new' | 'contacted' | 'quoted' | 'closed' | 'archived';
   adminNotes?: string;
   estimatedValue?: number;
+  utmParams?: Record<string, string>;
+  consentGiven?: boolean;
+  ageVerified?: boolean;
 }
 
 export interface Category {

@@ -46,7 +46,7 @@ export const FAQS_DATA: FAQItem[] = [
     id: 'faq-7',
     category: 'Bulk Orders & B2B',
     question: 'What volume discounts and payment terms are available for bulk orders?',
-    answer: 'We provide structured tier pricing for quantities of 100, 500, 1,000, 5,000, and 10,000+ units. Payment terms for repeat B2B partners include standard milestone payments (50% advance upon artwork confirmation, 50% prior to dispatch), with GST invoice compliance.',
+    answer: 'We provide structured tier pricing for quantities of 100, 500, 1,000, 5,000, and 10,000+ units. Payment terms for repeat B2B partners include standard milestone payments (50% advance upon artwork confirmation, 50% prior to dispatch), with official commercial invoice documentation.',
   },
   {
     id: 'faq-8',

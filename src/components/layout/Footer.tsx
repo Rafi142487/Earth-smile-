@@ -1,20 +1,28 @@
 import React from 'react';
 import { BrandLogo } from '../common/BrandLogo';
-import { ArrowUpRight, Phone, Mail, MapPin, ShieldCheck, Sparkles, Lock } from 'lucide-react';
+import { ArrowUpRight, Phone, Mail, MapPin, ShieldCheck, Sparkles, Lock, FileText, RefreshCw, Cookie, Trash2, CheckCircle2 } from 'lucide-react';
 import { WhatsAppIcon } from '../common/WhatsAppIcon';
 import { EARTH_SMILE_PHONE, buildWhatsAppUrl } from '../../utils/whatsapp';
+import { CopyButton } from '../common/CopyButton';
+import { LegalTab } from '../legal/LegalModal';
 
 interface FooterProps {
   onOpenEnquiry: (productName?: string) => void;
   onOpenBrandingStudio: () => void;
   onOpenAdmin?: () => void;
+  onOpenLegal?: (tab: LegalTab) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStudio, onOpenAdmin }) => {
+export const Footer: React.FC<FooterProps> = ({
+  onOpenEnquiry,
+  onOpenBrandingStudio,
+  onOpenAdmin,
+  onOpenLegal,
+}) => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#142018] text-[#D8E0DA] pt-20 pb-12 border-t border-[#263D2E]">
+    <footer className="bg-[#142018] text-[#D8E0DA] pt-20 pb-12 border-t border-[#263D2E] no-print">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 pb-16 border-b border-[#2A4132]">
@@ -22,12 +30,21 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
           <div className="lg:col-span-4 space-y-4">
             <BrandLogo variant="light" size="lg" />
             <p className="text-xs sm:text-sm text-[#AAB8AE] leading-relaxed max-w-sm pt-2">
-              Earth Smile manufactures certified organic Moso bamboo toothbrushes and handcrafted bamboo tongue cleaners for clinics, boutique hotels, eco-resorts, and retail distributors worldwide. Preview your custom brand logo on the bamboo product before print.
+              Earth Smile manufactures certified organic Moso bamboo toothbrushes and handcrafted bamboo tongue cleaners for dental practices, boutique hotels, eco-resorts, and retail distributors worldwide.
             </p>
 
-            <div className="pt-2 text-xs text-[#8FA596] flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#DE9B5E]" />
-              <span>100% Organic Moso Bamboo · Zero Plastic Supply Chain</span>
+            {/* Corporate Registration Details */}
+            <div className="pt-2 text-[11px] text-[#8FA596] space-y-1.5 border-t border-[#243B2E]">
+              <div className="flex items-center justify-between">
+                <span>Entity: <strong>Earth Smile Eco Innovations Pvt. Ltd.</strong></span>
+              </div>
+              <div>
+                <span>Registered Office: Peenya 2nd Stage, Bengaluru, KA 560058</span>
+              </div>
+              <div className="flex items-center gap-2 pt-1 text-[10px] text-[#A5BBAE]">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#DE9B5E]" />
+                <span>Zero Plastic Supply Chain • 100% Upfront Pricing Guarantee</span>
+              </div>
             </div>
           </div>
 
@@ -39,7 +56,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
             <ul className="space-y-2 text-xs text-[#B5C2B9]">
               <li>
                 <a href="#products" className="hover:text-white transition-colors">
-                  Products
+                  Products & Catalog
                 </a>
               </li>
               <li>
@@ -84,38 +101,68 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
             </ul>
           </div>
 
-          {/* Pure Earth Smile Offerings (Col span 3) */}
+          {/* Legal & Trust Column (Col span 3) */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-[#DE9B5E] font-mono">
-              Earth Smile Products
+              Legal, Trust & Policies
             </h4>
-            <ul className="space-y-2.5 text-xs text-[#B5C2B9]">
+            <ul className="space-y-2 text-xs text-[#B5C2B9]">
               <li>
-                <a href="#products" className="hover:text-white transition-colors block">
-                  <span className="font-medium text-white block">1. Bamboo Toothbrush</span>
-                  <span className="text-[11px] text-[#86998C]">Ergonomic steam-carbonized Moso bamboo handle</span>
-                </a>
-              </li>
-              <li>
-                <a href="#products" className="hover:text-white transition-colors block">
-                  <span className="font-medium text-white block">2. Bamboo Tongue Cleaner</span>
-                  <span className="text-[11px] text-[#86998C]">100% organic with kraft packaging box</span>
-                </a>
-              </li>
-              <li>
-                <a href="#products" className="hover:text-white transition-colors block">
-                  <span className="font-medium text-white block">3. Toothbrush + Cleaner Combo</span>
-                  <span className="text-[11px] text-[#86998C]">Complete daily all-bamboo oral hygiene set</span>
-                </a>
-              </li>
-              <li className="pt-1">
                 <button
-                  onClick={onOpenBrandingStudio}
-                  className="text-[11px] text-[#DE9B5E] hover:underline flex items-center gap-1 cursor-pointer"
+                  onClick={() => onOpenLegal?.('privacy')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer text-left"
                 >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Preview your logo before printing</span>
+                  <ShieldCheck className="w-3 h-3 text-[#8FA596]" />
+                  <span>Privacy Policy (GDPR / DPDP)</span>
                 </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onOpenLegal?.('terms')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <FileText className="w-3 h-3 text-[#8FA596]" />
+                  <span>Terms of Service (B2B Terms)</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onOpenLegal?.('refund')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <RefreshCw className="w-3 h-3 text-[#8FA596]" />
+                  <span>Refund & Quality Replacement</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onOpenLegal?.('cookies')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <Cookie className="w-3 h-3 text-[#8FA596]" />
+                  <span>Cookie Policy & Local Storage</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onOpenLegal?.('standards')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer text-left text-emerald-400"
+                >
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                  <span>Verified Material Standards</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onOpenLegal?.('deletion')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer text-left text-red-400"
+                >
+                  <Trash2 className="w-3 h-3 text-red-400" />
+                  <span>Request Data Deletion</span>
+                </button>
+              </li>
+              <li className="pt-2 text-[10px] text-[#7F9485]">
+                <span>Font Licenses: Inter & Cormorant (SIL OFL)</span>
               </li>
             </ul>
           </div>
@@ -128,42 +175,35 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
             <div className="space-y-2.5 text-xs text-[#B5C2B9]">
               <div className="flex items-start gap-2.5">
                 <WhatsAppIcon className="w-4 h-4 text-[#25D366] shrink-0 mt-0.5" />
-                <div>
+                <div className="flex-1">
                   <span className="text-[10px] text-[#869A8C] block">Direct WhatsApp & Support:</span>
-                  <a
-                    href={buildWhatsAppUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-white font-semibold hover:text-[#DE9B5E] transition-colors inline-block"
-                  >
-                    +91 {EARTH_SMILE_PHONE}
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5">
-                <Phone className="w-4 h-4 text-[#DE9B5E] shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-[10px] text-[#869A8C] block">Direct Call:</span>
-                  <a
-                    href={`tel:${EARTH_SMILE_PHONE}`}
-                    className="font-mono text-white font-semibold hover:text-[#DE9B5E] transition-colors inline-block"
-                  >
-                    {EARTH_SMILE_PHONE}
-                  </a>
+                  <div className="flex items-center justify-between">
+                    <a
+                      href={buildWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-white font-semibold hover:text-[#DE9B5E] transition-colors"
+                    >
+                      +91 {EARTH_SMILE_PHONE}
+                    </a>
+                    <CopyButton textToCopy={`+91${EARTH_SMILE_PHONE}`} label="Copy" size="sm" variant="ghost" className="text-stone-300" />
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5">
                 <Mail className="w-4 h-4 text-[#DE9B5E] shrink-0 mt-0.5" />
-                <div>
+                <div className="flex-1">
                   <span className="text-[10px] text-[#869A8C] block">Commercial Inquiries:</span>
-                  <a
-                    href="mailto:contact@earthsmile.in"
-                    className="text-white hover:text-[#DE9B5E] transition-colors"
-                  >
-                    contact@earthsmile.in
-                  </a>
+                  <div className="flex items-center justify-between">
+                    <a
+                      href="mailto:contact@earthsmile.in"
+                      className="text-white hover:text-[#DE9B5E] transition-colors font-mono"
+                    >
+                      contact@earthsmile.in
+                    </a>
+                    <CopyButton textToCopy="contact@earthsmile.in" label="Copy" size="sm" variant="ghost" className="text-stone-300" />
+                  </div>
                 </div>
               </div>
 
@@ -179,7 +219,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
             <div className="pt-2">
               <button
                 onClick={() => onOpenEnquiry('Direct B2B Bamboo Procurement Proposal')}
-                className="w-full py-2.5 px-4 text-xs font-semibold text-[#142018] bg-[#DE9B5E] hover:bg-[#E5AA72] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                className="w-full py-2.5 px-4 text-xs font-semibold text-[#142018] bg-[#DE9B5E] hover:bg-[#E5AA72] rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
               >
                 <span>Request B2B Quotation</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -192,21 +232,34 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEnquiry, onOpenBrandingStu
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7F9485]">
           <div>
             <p>
-              © {currentYear} <strong>EARTH SMILE</strong>. All rights reserved.
+              © {currentYear} <strong>Earth Smile Eco Innovations Pvt. Ltd.</strong> All rights reserved.
             </p>
             <p className="text-[11px] text-[#697D6E] mt-0.5">
-              Eco-friendly dental-care products: Bamboo Toothbrushes, Bamboo Tongue Cleaners & Combos.
+              Verified for Q4 2026 • Certified Organic Moso Bamboo Oral Hygiene Solutions.
             </p>
           </div>
 
-          <div className="flex items-center gap-5 text-[11px] flex-wrap justify-center sm:justify-end">
-            <span className="text-[#8FA596]">
-              WhatsApp: <strong>+91 {EARTH_SMILE_PHONE}</strong>
-            </span>
+          <div className="flex items-center gap-4 text-[11px] flex-wrap justify-center sm:justify-end">
+            <button
+              onClick={() => onOpenLegal?.('privacy')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Privacy Policy
+            </button>
             <span className="text-[#55695C]">·</span>
-            <span className="text-[#8FA596]">
-              100% Organic Moso Bamboo
-            </span>
+            <button
+              onClick={() => onOpenLegal?.('terms')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Terms of Service
+            </button>
+            <span className="text-[#55695C]">·</span>
+            <button
+              onClick={() => onOpenLegal?.('cookies')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Cookie Settings
+            </button>
             <span className="text-[#55695C]">·</span>
             <a
               href="/admin"

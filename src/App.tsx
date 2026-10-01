@@ -14,15 +14,18 @@ import { ContactSection } from './components/contact/ContactSection';
 import { FinalCTA } from './components/home/FinalCTA';
 import { EnquiryModal } from './components/enquiry/EnquiryModal';
 import { ProductDetailModal } from './components/catalog/ProductDetailModal';
-import { WhatsAppButton } from './components/common/WhatsAppButton';
 import { ScrollProgressBar } from './components/common/ScrollProgressBar';
 import { BackToTop } from './components/common/BackToTop';
 import { CookieBanner } from './components/common/CookieBanner';
 import { KeyboardShortcutsModal } from './components/common/KeyboardShortcutsModal';
+import { FloatingContactWidget } from './components/common/FloatingContactWidget';
+import { SiteSearchModal } from './components/search/SiteSearchModal';
+import { LegalModal, LegalTab } from './components/legal/LegalModal';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { authService } from './services/authService';
 import { productService } from './services/productService';
+import { utmTracker } from './utils/utmTracker';
 import { Product } from './types';
 
 export default function App() {
@@ -34,9 +37,13 @@ export default function App() {
   const [isAdminRoute, setIsAdminRoute] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(authService.isAuthenticated());
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isLegalOpen, setIsLegalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<LegalTab>('privacy');
 
-  // Initialize theme on mount
+  // Initialize theme and UTM tracking on mount
   useEffect(() => {
+    // 1. Theme
     try {
       const saved = localStorage.getItem('earthsmile_theme');
       if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -45,6 +52,9 @@ export default function App() {
     } catch {
       // ignore
     }
+
+    // 2. UTM Tracking
+    utmTracker.init();
   }, []);
 
   // Global Keyboard Shortcuts Listener
@@ -60,13 +70,21 @@ export default function App() {
       if (e.key === 'Escape') {
         setIsShortcutsOpen(false);
         setIsEnquiryModalOpen(false);
+        setIsSearchOpen(false);
+        setIsLegalOpen(false);
         handleCloseProductModal();
         return;
       }
 
       if (isTyping) return;
 
-      if (e.key === '?' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(prev => !prev);
+      } else if (e.key === '/') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      } else if (e.key === '?') {
         e.preventDefault();
         setIsShortcutsOpen(prev => !prev);
       } else if (e.key.toLowerCase() === 'h') {
@@ -96,7 +114,32 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Load products and synchronize route on mount and navigation
+  // Intersection Observer for Active Section tracking
+  useEffect(() => {
+    const sections = ['products', 'why-us', 'custom-branding', 'b2b', 'product-details', 'sustainability', 'faq', 'contact'];
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 200;
+      for (const section of sections) {
+        const el = document.getElementById(section);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(section);
+            return;
+          }
+        }
+      }
+      if (window.scrollY < 300) {
+        setActiveSection('home');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Synchronize route and handle clean popstate
   useEffect(() => {
     setProducts(productService.getProducts());
 
@@ -130,7 +173,7 @@ export default function App() {
       // No product modal active
       setSelectedProductSlug(null);
 
-      // Section anchor smooth scroll support (e.g. /why-us, #b2b, #custom-branding)
+      // Section anchor smooth scroll support
       const targetId = (hash ? hash.replace('#', '') : pathname.replace(/^\//, '')).replace(/\/$/, '');
       if (targetId && !['product', 'products', 'admin'].includes(targetId)) {
         const el = document.getElementById(targetId);
@@ -186,16 +229,22 @@ export default function App() {
     window.history.pushState(null, '', '/');
   };
 
-  const handleAdminLogout = () => {
-    authService.logout();
-    setIsAdminAuthenticated(false);
-  };
-
   const handleAdminLoginSuccess = () => {
     setIsAdminAuthenticated(true);
   };
 
-  // Find active product for modal if selected
+  const handleAdminLogout = () => {
+    authService.logout();
+    setIsAdminAuthenticated(false);
+    setIsAdminRoute(false);
+    window.history.pushState(null, '', '/');
+  };
+
+  const handleOpenLegalModal = (tab: LegalTab) => {
+    setLegalTab(tab);
+    setIsLegalOpen(true);
+  };
+
   const activeDetailProduct = selectedProductSlug
     ? productService.getProductBySlug(selectedProductSlug) || null
     : null;
@@ -235,6 +284,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FBFBF9] dark:bg-[#0E1611] text-[#1C1F1D] dark:text-[#E2ECE5] selection:bg-[#E2ECE3] selection:text-[#192E22] transition-colors duration-300">
+      {/* Accessibility: Skip to Content Anchor */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#192E22] focus:text-white focus:rounded-md focus:shadow-xl focus:ring-2 focus:ring-emerald-400 font-medium text-xs tracking-wide"
+      >
+        Skip to main content
+      </a>
+
       {/* 0. Top Reading Scroll Progress Bar */}
       <ScrollProgressBar />
 
@@ -244,10 +301,12 @@ export default function App() {
         onOpenBrandingStudio={handleScrollToBrandingStudio}
         onOpenAdmin={handleOpenAdmin}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenLegal={handleOpenLegalModal}
         activeSection={activeSection}
       />
 
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         {/* 2. Hero Section */}
         <Hero
           onExploreProducts={() => {
@@ -297,7 +356,7 @@ export default function App() {
         <FAQSection />
 
         {/* 10. Contact / Commercial Enquiry Form */}
-        <ContactSection />
+        <ContactSection onOpenLegal={handleOpenLegalModal} />
 
         {/* High-Impact Brand Call-to-Action */}
         <FinalCTA onOpenEnquiry={handleOpenEnquiry} />
@@ -308,6 +367,7 @@ export default function App() {
         onOpenEnquiry={handleOpenEnquiry}
         onOpenBrandingStudio={handleScrollToBrandingStudio}
         onOpenAdmin={handleOpenAdmin}
+        onOpenLegal={handleOpenLegalModal}
       />
 
       {/* Product Detail Modal with Live Logo Tester */}
@@ -326,16 +386,34 @@ export default function App() {
         isOpen={isEnquiryModalOpen}
         onClose={() => setIsEnquiryModalOpen(false)}
         defaultProductName={enquiryProductName}
+        onOpenLegal={handleOpenLegalModal}
       />
 
-      {/* Floating WhatsApp Button with Official Logo */}
-      <WhatsAppButton />
+      {/* Universal Site Search & Command Palette (Cmd+K or /) */}
+      <SiteSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onOpenEnquiry={handleOpenEnquiry}
+        onOpenBrandingStudio={handleScrollToBrandingStudio}
+        onSelectProduct={handleSelectProduct}
+        onOpenLegal={handleOpenLegalModal}
+      />
+
+      {/* Comprehensive Compliance, Legal & Privacy Hub Modal */}
+      <LegalModal
+        isOpen={isLegalOpen}
+        onClose={() => setIsLegalOpen(false)}
+        defaultTab={legalTab}
+      />
+
+      {/* Floating Multi-Action Contact Widget (Instant WhatsApp, Helpline, Request Quote, Copy Info) */}
+      <FloatingContactWidget onOpenEnquiry={handleOpenEnquiry} />
 
       {/* Floating Back-to-Top Button ↑ */}
       <BackToTop />
 
-      {/* GDPR / Privacy Cookie Banner */}
-      <CookieBanner />
+      {/* GDPR / Privacy Cookie Banner with Preferences */}
+      <CookieBanner onOpenCookiePolicy={() => handleOpenLegalModal('cookies')} />
 
       {/* Keyboard Shortcuts Palette / Guide */}
       <KeyboardShortcutsModal

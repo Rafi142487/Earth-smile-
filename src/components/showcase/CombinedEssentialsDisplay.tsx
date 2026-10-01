@@ -52,10 +52,10 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
 
   const handleWhatsAppPair = () => {
     return buildWhatsAppUrl({
-      productName: 'Bamboo Toothbrush + Tongue Cleaner Combined Essentials Duo',
-      quantity: 50,
+      productName: 'Complete Care Combo (Bamboo Toothbrush + Tongue Cleaner + Plantable Seed Balls)',
+      quantity: 200,
       customBranding: true,
-      customQuery: `Hi Earth Smile, I want to enquire about the Combined Essentials Duo (Bamboo Toothbrush + Bamboo Tongue Cleaner paired together) with custom laser branding "${logoText}". Please share wholesale quotation and sample details.`,
+      customQuery: `Hi Earth Smile, I want to enquire about the Complete Care Combo (Bamboo Toothbrush + Bamboo Tongue Cleaner + Plantable Seed Balls) with custom branding "${logoText}". Please share wholesale quotation and sample details.`,
     });
   };
 
@@ -338,10 +338,10 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
               </div>
               <div>
                 <h5 className="font-serif text-sm font-semibold text-[#192E22]">
-                  Single Unbleached Kraft Box Presentation
+                  Plantable Seed Balls & Kraft Gift Presentation Box
                 </h5>
                 <p className="text-xs text-[#5D6560] leading-relaxed mt-0.5">
-                  Supplied together in a debossed rigid kraft gift box with soy ink printing. Higher perceived value for gifting and welcome kits.
+                  Includes native plantable seed balls alongside the brush and cleaner in a rigid recycled unbleached kraft gift box with soy ink printing.
                 </p>
               </div>
             </div>
@@ -350,16 +350,16 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
           {/* Quick Specifications Strip & Exact Combo Price */}
           <div className="p-4 bg-[#F5F5EE] dark:bg-[#14231B] border border-[#ECEBE2] dark:border-[#233B2C] rounded-xl grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div>
-              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Combo Max Price:</span>
-              <span className="font-serif text-base font-bold text-[#192E22] dark:text-white">₹129/-</span>
+              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Tiered Price:</span>
+              <span className="font-serif text-base font-bold text-[#192E22] dark:text-white">₹129 → ₹99/pc</span>
             </div>
             <div>
-              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Set MOQ:</span>
-              <span className="font-mono font-semibold text-[#192E22] dark:text-white">50 Sets</span>
+              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">MOQ:</span>
+              <span className="font-mono font-semibold text-[#192E22] dark:text-white">200 Pcs / Sets</span>
             </div>
             <div>
-              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Material:</span>
-              <span className="font-medium text-[#192E22] dark:text-white">100% Bamboo</span>
+              <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Includes:</span>
+              <span className="font-medium text-[#192E22] dark:text-white">Brush + Cleaner + Seed Balls</span>
             </div>
             <div>
               <span className="text-[#78817B] dark:text-[#9FB1A5] block text-[10px] uppercase font-mono">Proofing:</span>
@@ -368,26 +368,27 @@ export const CombinedEssentialsDisplay: React.FC<CombinedEssentialsDisplayProps>
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-2 flex flex-wrap items-center gap-3">
+          <div className="pt-2 flex items-center gap-3">
             <button
               onClick={() =>
                 onOpenEnquiry(
-                  `Combined Essentials Duo (Toothbrush + Tongue Cleaner Together) - Logo: ${logoText}`
+                  `Complete Care Combo (Toothbrush + Tongue Cleaner + Seed Balls) - Logo: ${logoText}`
                 )
               }
               className="flex-1 min-w-[170px] py-3.5 px-6 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all shadow-xs text-center uppercase tracking-wider cursor-pointer"
             >
-              GET A QUOTE FOR THE PAIR
+              GET COMBO QUOTE (FROM ₹99/PC)
             </button>
 
             <a
               href={handleWhatsAppPair()}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-3.5 px-4 text-xs font-semibold text-[#192E22] bg-[#EAF2EC] hover:bg-[#DDEADA] border border-[#CCDDCF] rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              title="Direct WhatsApp"
+              aria-label="Direct WhatsApp"
+              className="w-12 h-12 shrink-0 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95"
             >
-              <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
-              <span>WhatsApp: {EARTH_SMILE_PHONE}</span>
+              <WhatsAppIcon className="w-6 h-6 fill-white" />
             </a>
 
             <button

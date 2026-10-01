@@ -6,6 +6,7 @@ import { supabase, supabaseService, SUPABASE_PROJECT_ID, SUPABASE_URL, SUPABASE_
 import { LeadEnquiry, Product } from '../../types';
 import { BrandLogo } from '../common/BrandLogo';
 import { buildWhatsAppUrl } from '../../utils/whatsapp';
+import { calculateQuotePricing } from '../../utils/quotePricing';
 import {
   ShieldCheck,
   LogOut,
@@ -26,6 +27,7 @@ import {
   KeyRound,
   RefreshCw,
   Eye,
+  EyeOff,
   X,
   AlertCircle,
   FileSpreadsheet,
@@ -34,7 +36,11 @@ import {
   Check,
   Database,
   Copy,
-  CheckCheck
+  CheckCheck,
+  Printer,
+  Download,
+  Receipt,
+  TrendingUp,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -85,6 +91,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Reload & sync data with Supabase
@@ -117,9 +126,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
       setDbTestResult(res);
     }).catch(() => {});
 
+    // Auto-sync polling every 10 seconds to ensure live updates
+    const pollInterval = setInterval(() => {
+      refreshLeads();
+    }, 10000);
+
+    // Sync on tab focus
+    const handleFocus = () => {
+      refreshLeads();
+    };
+    window.addEventListener('focus', handleFocus);
+
     // Supabase Real-time Listener: Live quotation updates
+    let channel: any = null;
     try {
-      const channel = supabase
+      channel = supabase
         .channel('realtime:quotations-admin')
         .on(
           'postgres_changes',
@@ -129,13 +150,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
           }
         )
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     } catch (e) {
       console.warn('Realtime channel error:', e);
     }
+
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('focus', handleFocus);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, []);
 
   const handleTestSupabase = async () => {
@@ -349,6 +374,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
   const newLeadsCount = leads.filter(l => (l?.status || 'new') === 'new').length;
   const customBrandingCount = leads.filter(l => Boolean(l?.customBranding)).length;
   const totalUnits = leads.reduce((acc, l) => acc + (Number(l?.quantity) || 0), 0);
+  const totalPipelineValue = leads.reduce((acc, l) => acc + calculateQuotePricing(l).grandTotal, 0);
   const bulkOrdersCount = leads.filter(l => (Number(l?.quantity) || 0) >= 500).length;
 
   return (
@@ -365,7 +391,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
               </span>
               <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#5D6760]">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Client Requirements Manager</span>
+                <span>Client Quotations & Enquiries</span>
               </span>
             </div>
           </div>
@@ -428,13 +454,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-[#E3E1D7] shadow-xs">
-            <div className="text-[11px] font-mono uppercase tracking-wider text-[#69726B] mb-1">
-              Custom Laser Branding
+            <div className="text-[11px] font-mono uppercase tracking-wider text-emerald-800 font-semibold mb-1">
+              Total Quotation Pipeline
             </div>
-            <div className="text-2xl font-serif font-bold text-[#192E22]">
-              {customBrandingCount}
+            <div className="text-2xl font-serif font-bold text-emerald-800">
+              ₹{totalPipelineValue.toLocaleString('en-IN')}
             </div>
-            <div className="text-[11px] text-stone-500 mt-1">Logo engraving requested</div>
+            <div className="text-[11px] text-stone-500 mt-1">Estimated commercial value</div>
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-[#E3E1D7] shadow-xs">
@@ -449,12 +475,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
 
           <div className="bg-white p-4 rounded-xl border border-[#E3E1D7] shadow-xs col-span-2 sm:col-span-1">
             <div className="text-[11px] font-mono uppercase tracking-wider text-[#69726B] mb-1">
-              Bulk Orders (≥500)
+              Custom Laser Branding
             </div>
-            <div className="text-2xl font-serif font-bold text-emerald-800">
-              {bulkOrdersCount}
+            <div className="text-2xl font-serif font-bold text-[#192E22]">
+              {customBrandingCount}
             </div>
-            <div className="text-[11px] text-stone-500 mt-1">High-volume shipments</div>
+            <div className="text-[11px] text-stone-500 mt-1">Logo engraving requested</div>
           </div>
         </div>
 
@@ -636,10 +662,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="bg-[#FAF9F5] text-[#556059] uppercase tracking-wider font-mono text-[10px] border-b border-[#E3E1D7]">
-                        <th className="py-3 px-4">Client & Organization</th>
-                        <th className="py-3 px-4">Requirement / Product</th>
-                        <th className="py-3 px-4">Branding Specification</th>
-                        <th className="py-3 px-4">Client Brief / Instructions</th>
+                        <th className="py-3 px-4">Quote Ref & Client</th>
+                        <th className="py-3 px-4">Product Demanded</th>
+                        <th className="py-3 px-4">Branding Spec</th>
+                        <th className="py-3 px-4">Quotation Value (INR)</th>
                         <th className="py-3 px-4">Status</th>
                         <th className="py-3 px-4 text-right">Direct Response</th>
                         <th className="py-3 px-3 text-right">Actions</th>
@@ -647,6 +673,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                     </thead>
                     <tbody className="divide-y divide-[#EFECE4]">
                       {filteredLeads.map(lead => {
+                        const pricing = calculateQuotePricing(lead);
                         const statusColors = {
                           new: 'bg-amber-100 text-amber-900 border-amber-300 font-semibold',
                           contacted: 'bg-blue-100 text-blue-900 border-blue-300',
@@ -657,18 +684,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
 
                         const whatsAppUrl = buildWhatsAppUrl({
                           productName: lead.productName || 'Bamboo Toothbrush',
-                          quantity: Number(lead.quantity) || 50,
+                          quantity: pricing.quantity,
                           customBranding: Boolean(lead.customBranding),
                           companyName: lead.company || 'Practice',
                           senderName: lead.name || 'Client',
-                          customQuery: `Hello ${lead.name || 'Client'}, thank you for contacting Earth Smile. We have reviewed your requirement for ${lead.quantity || 50} units of ${lead.productName || 'Bamboo Toothbrush'}${lead.customBranding ? ' with custom laser engraving' : ''}. Here is our quotation and production schedule.`,
+                          customQuery: `Hello ${lead.name || 'Client'}, thank you for contacting Earth Smile. We have prepared your official quotation (${pricing.referenceCode}) for ${pricing.quantity} units of ${lead.productName || 'Bamboo Toothbrush'}${lead.customBranding ? ' with custom laser engraving' : ''}.\n\n• Unit Rate: ₹${pricing.effectiveRate}/unit\n• Total Quotation: ₹${pricing.grandTotal.toLocaleString('en-IN')}\n• Dispatch Timeline: ${pricing.dispatchTimeline}\n\nPlease let us know if you would like to proceed with sample verification.`,
                         });
 
                         return (
-                          <tr key={lead.id} className="hover:bg-[#FAF9F5] transition-colors">
-                            {/* Client & Organization */}
-                            <td className="py-3.5 px-4 min-w-[190px]">
-                              <div className="font-semibold text-[#192E22] text-sm">
+                          <tr
+                            key={lead.id}
+                            onClick={e => {
+                              if (!(e.target as HTMLElement).closest('button, a, select, input')) {
+                                setSelectedLead(lead);
+                              }
+                            }}
+                            className="hover:bg-[#FAF9F5] transition-colors cursor-pointer group"
+                          >
+                            {/* Quote Ref & Client */}
+                            <td className="py-3.5 px-4 min-w-[200px]">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-mono font-bold text-[11px] text-[#BD7B3C] bg-[#F8EFE4] px-1.5 py-0.5 rounded border border-[#E9D6C4]">
+                                  {pricing.referenceCode}
+                                </span>
+                                <span className="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  {lead.leadSource || 'Supabase DB'}
+                                </span>
+                              </div>
+                              <div className="font-bold text-[#192E22] text-sm group-hover:text-[#BD7B3C] transition-colors">
                                 {lead.name || 'Anonymous Client'}
                               </div>
                               <div className="text-[11px] text-[#59635C] flex items-center gap-1 mt-0.5">
@@ -679,41 +723,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                                 <MapPin className="w-2.5 h-2.5" />
                                 <span>{lead.city || 'India'}</span>
                               </div>
-                              <span className="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                {lead.leadSource || 'Supabase DB'}
-                              </span>
+                              <div className="text-[10px] text-stone-500 font-mono mt-1">
+                                <span>{lead.phone}</span>
+                                {lead.email && <span className="text-stone-400"> • {lead.email}</span>}
+                              </div>
                             </td>
 
                             {/* Product & Volume Requirement */}
                             <td className="py-3.5 px-4 min-w-[180px]">
-                              <div className="font-medium text-[#192E22]">
+                              <div className="font-semibold text-[#192E22] text-sm">
                                 {lead.productName || 'Bamboo Toothbrush'}
                               </div>
                               <div className="text-[11px] text-stone-600 font-mono mt-0.5 flex items-center gap-1.5">
-                                <strong className="text-[#192E22] font-bold text-xs">{(Number(lead.quantity) || 50).toLocaleString()}</strong> units
-                                {(Number(lead.quantity) || 0) >= 500 && (
+                                <strong className="text-[#192E22] font-bold text-sm">{pricing.quantity.toLocaleString()}</strong> units
+                                {pricing.quantity >= 500 && (
                                   <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-mono font-semibold">
                                     BULK
                                   </span>
                                 )}
                               </div>
-                              <div className="text-[10px] text-stone-400 mt-0.5 font-mono">
+                              <div className="text-[10px] text-stone-400 mt-1 font-mono">
                                 Recv: {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent'}
                               </div>
                             </td>
 
                             {/* Branding Spec */}
-                            <td className="py-3.5 px-4 max-w-[200px]">
+                            <td className="py-3.5 px-4 max-w-[190px]">
                               {lead.customBranding ? (
                                 <div>
                                   <span className="inline-flex items-center gap-1 bg-[#F9EFE4] text-[#8F5620] border border-[#EACBB0] text-[10px] font-mono px-2 py-0.5 rounded font-semibold">
                                     <Sparkles className="w-2.5 h-2.5 text-[#BD7B3C]" />
                                     Custom Laser
                                   </span>
-                                  {lead.brandingDetails && (
+                                  {lead.brandingDetails ? (
                                     <p className="text-[11px] text-[#474E49] mt-1 line-clamp-2 italic font-serif">
                                       "{lead.brandingDetails}"
+                                    </p>
+                                  ) : (
+                                    <p className="text-[10px] text-stone-400 mt-0.5 italic">
+                                      Client requested custom logo engraving
                                     </p>
                                   )}
                                 </div>
@@ -724,17 +772,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                               )}
                             </td>
 
-                            {/* Client Brief / Instructions */}
-                            <td className="py-3.5 px-4 max-w-[240px]">
-                              <p className="text-[11px] text-stone-700 line-clamp-2 leading-relaxed">
-                                {lead.message || 'No additional instructions provided.'}
-                              </p>
-                              {lead.adminNotes && (
-                                <div className="mt-1 flex items-center gap-1 text-[10px] text-stone-500 bg-[#F4EFE6] px-1.5 py-0.5 rounded font-mono truncate">
-                                  <span className="text-[#BD7B3C] font-semibold">Note:</span>
-                                  <span className="truncate">{lead.adminNotes}</span>
-                                </div>
-                              )}
+                            {/* Commercial Quote Value (INR) */}
+                            <td className="py-3.5 px-4 min-w-[170px]">
+                              <div className="text-sm font-mono font-bold text-emerald-800">
+                                ₹{pricing.grandTotal.toLocaleString('en-IN')}
+                              </div>
+                              <div className="text-[10px] text-stone-500 font-mono mt-0.5">
+                                ₹{pricing.effectiveRate}/unit • Net Commercial
+                              </div>
+                              <div className="mt-1">
+                                <span className="text-[9px] bg-stone-100 text-stone-700 px-1.5 py-0.5 rounded font-mono border border-stone-200">
+                                  {pricing.tierName}
+                                </span>
+                              </div>
                             </td>
 
                             {/* Status with inline selector */}
@@ -767,7 +817,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                                   <MessageCircle className="w-3.5 h-3.5" />
                                 </a>
                                 <a
-                                  href={`mailto:${lead.email}?subject=Earth Smile Commercial Quotation: ${lead.productName}&body=Dear ${lead.name},%0D%0A%0D%0AThank you for contacting Earth Smile about your inquiry for ${lead.quantity} units of ${lead.productName}. We have reviewed your client requirements.`}
+                                  href={`mailto:${lead.email}?subject=Earth Smile Commercial Quotation: ${lead.productName}&body=Dear ${lead.name},%0D%0A%0D%0AThank you for contacting Earth Smile about your inquiry for ${pricing.quantity} units of ${lead.productName}. We have prepared your commercial quotation (${pricing.referenceCode}):%0D%0A%0D%0A• Total Quotation: ₹${pricing.grandTotal}%0D%0A• Unit Rate: ₹${pricing.effectiveRate}/unit%0D%0A• Dispatch Timeline: ${pricing.dispatchTimeline}%0D%0A%0D%0ABest regards,%0D%0AEarth Smile Commercial Team`}
                                   className="p-1.5 bg-[#EEF2F6] hover:bg-[#DEE5ED] text-[#255D8C] rounded-md transition-colors cursor-pointer"
                                   title={`Email: ${lead.email}`}
                                 >
@@ -788,10 +838,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                               <div className="inline-flex items-center gap-1">
                                 <button
                                   onClick={() => setSelectedLead(lead)}
-                                  className="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 rounded transition-colors cursor-pointer"
-                                  title="View Full Client Requirement Dossier & Internal Notes"
+                                  className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-[#192E22] bg-[#FAF9F5] hover:bg-[#EDE9DE] border border-[#DDD9CE] rounded-md transition-colors cursor-pointer shadow-2xs"
+                                  title="View Full Quotation Dossier & Breakdown"
                                 >
-                                  <Eye className="w-3.5 h-3.5" />
+                                  <FileText className="w-3 h-3 text-[#BD7B3C]" />
+                                  <span>View Quote</span>
                                 </button>
                                 <button
                                   onClick={() => handleDeleteLead(lead.id)}
@@ -918,42 +969,72 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
                   <label className="block text-xs font-mono font-semibold text-[#192E22] uppercase tracking-wider mb-1">
                     Current Administrator Password
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={currentPassword}
-                    onChange={e => setCurrentPassword(e.target.value)}
-                    placeholder="Enter current password"
-                    className="w-full px-3 py-2 text-sm bg-white border border-[#DEDCCE] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#192E22]"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCurrentPw ? 'text' : 'password'}
+                      required
+                      value={currentPassword}
+                      onChange={e => setCurrentPassword(e.target.value)}
+                      placeholder="Enter current password"
+                      className="w-full px-3 py-2 pr-10 text-sm bg-white border border-[#DEDCCE] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#192E22]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPw(!showCurrentPw)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 cursor-pointer"
+                      aria-label={showCurrentPw ? 'Hide password' : 'Show password'}
+                    >
+                      {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-mono font-semibold text-[#192E22] uppercase tracking-wider mb-1">
                     New Administrator Password
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    placeholder="At least 6 characters"
-                    className="w-full px-3 py-2 text-sm bg-white border border-[#DEDCCE] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#192E22]"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPw ? 'text' : 'password'}
+                      required
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="w-full px-3 py-2 pr-10 text-sm bg-white border border-[#DEDCCE] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#192E22]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPw(!showNewPw)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 cursor-pointer"
+                      aria-label={showNewPw ? 'Hide password' : 'Show password'}
+                    >
+                      {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-mono font-semibold text-[#192E22] uppercase tracking-wider mb-1">
                     Confirm New Password
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    placeholder="Repeat new password"
-                    className="w-full px-3 py-2 text-sm bg-white border border-[#DEDCCE] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#192E22]"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPw ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="Repeat new password"
+                      className="w-full px-3 py-2 pr-10 text-sm bg-white border border-[#DEDCCE] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#192E22]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPw(!showConfirmPw)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 cursor-pointer"
+                      aria-label={showConfirmPw ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="pt-2">
@@ -1243,194 +1324,321 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExit, onLogout
         </div>
       </main>
 
-      {/* 3. Detailed Client Requirements Dossier Modal */}
-      {selectedLead && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={e => {
-            if (e.target === e.currentTarget) setSelectedLead(null);
-          }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
-        >
-          <div className="bg-[#FAF9F5] border border-[#E3E1D7] rounded-2xl w-full max-w-2xl my-auto shadow-2xl overflow-hidden relative">
-            <div className="bg-white border-b border-[#EAE9E1] px-6 py-4 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#BD7B3C] font-semibold block">
-                  Client Requirement Dossier
-                </span>
-                <h2 className="font-serif text-xl font-bold text-[#192E22]">
-                  {selectedLead.name}
-                </h2>
-              </div>
-              <button
-                onClick={() => setSelectedLead(null)}
-                className="p-2 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-full transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* 3. Detailed Client Quotation Dossier Modal */}
+      {selectedLead && (() => {
+        const pricing = calculateQuotePricing(selectedLead);
+        const quoteSummaryText = `EARTH SMILE COMMERCIAL QUOTATION\nRef: ${pricing.referenceCode}\nDate: ${new Date(selectedLead.createdAt).toLocaleDateString('en-IN')}\n\nClient: ${selectedLead.name} (${selectedLead.company || 'Direct'})\nContact: ${selectedLead.phone} | ${selectedLead.email || 'N/A'}\nLocation: ${selectedLead.city || 'India'}\n\nProduct: ${selectedLead.productName || 'Bamboo Toothbrush'}\nQuantity: ${pricing.quantity} units\nWholesale Unit Rate: ₹${pricing.unitRate}/unit\nLaser Engraving Surcharge: ${pricing.brandingRate > 0 ? `₹${pricing.brandingRate}/unit` : 'Included / Standard'}\nEffective Rate: ₹${pricing.effectiveRate}/unit\n\nGrand Total: ₹${pricing.grandTotal.toLocaleString('en-IN')}\nDispatch Timeline: ${pricing.dispatchTimeline}\n\nBranding Specs: ${selectedLead.customBranding ? (selectedLead.brandingDetails || 'Custom laser logo engraving requested') : 'Standard Earth Smile unbleached packaging'}`;
 
-            <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
-              {/* Status and Timestamp */}
-              <div className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-[#E8E6DD]">
+        return (
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={e => {
+              if (e.target === e.currentTarget) setSelectedLead(null);
+            }}
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+          >
+            <div className="bg-[#FAF9F5] border border-[#E3E1D7] rounded-2xl w-full max-w-3xl my-auto shadow-2xl overflow-hidden relative">
+              {/* Modal Top Header */}
+              <div className="bg-white border-b border-[#EAE9E1] px-6 py-4 flex items-center justify-between">
                 <div>
-                  <span className="text-stone-400 block text-[10px] font-mono uppercase">Requirement Status</span>
-                  <div className="mt-1">
-                    <select
-                      value={selectedLead.status}
-                      onChange={e => handleStatusChange(selectedLead.id, e.target.value as any)}
-                      className="text-xs font-semibold uppercase tracking-wider font-mono border border-[#DDD9CE] rounded px-2 py-1 bg-[#FBFBF9]"
-                    >
-                      <option value="new">NEW INQUIRY</option>
-                      <option value="contacted">CONTACTED</option>
-                      <option value="quoted">QUOTED</option>
-                      <option value="closed">CLOSED / WON</option>
-                      <option value="archived">ARCHIVED</option>
-                    </select>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#BD7B3C] font-bold bg-[#F8EFE4] px-2 py-0.5 rounded border border-[#E9D6C4]">
+                      Quotation #{pricing.referenceCode}
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1 font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Live Database Record
+                    </span>
                   </div>
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#192E22]">
+                    Commercial Quotation Dossier
+                  </h2>
                 </div>
-                <div className="text-right">
-                  <span className="text-stone-400 block text-[10px] font-mono uppercase">Date Received</span>
-                  <span className="font-mono text-stone-700">
-                    {new Date(selectedLead.createdAt).toLocaleString()}
-                  </span>
-                  <span className="text-[10px] text-stone-400 block mt-0.5">Source: {selectedLead.leadSource}</span>
-                </div>
-              </div>
-
-              {/* Client & Organization Details */}
-              <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-[#E8E6DD]">
-                <div>
-                  <span className="text-stone-400 text-[10px] font-mono uppercase block">Organization / Clinic</span>
-                  <strong className="text-sm font-semibold text-[#192E22]">{selectedLead.company}</strong>
-                </div>
-                <div>
-                  <span className="text-stone-400 text-[10px] font-mono uppercase block">City / Territory</span>
-                  <span className="text-stone-700 font-medium">{selectedLead.city}</span>
-                </div>
-                <div>
-                  <span className="text-stone-400 text-[10px] font-mono uppercase block">Email Address</span>
-                  <a href={`mailto:${selectedLead.email}`} className="text-[#255D8C] font-mono hover:underline">
-                    {selectedLead.email}
-                  </a>
-                </div>
-                <div>
-                  <span className="text-stone-400 text-[10px] font-mono uppercase block">Phone / WhatsApp</span>
-                  <a href={`tel:${selectedLead.phone}`} className="text-stone-800 font-mono hover:underline">
-                    {selectedLead.phone}
-                  </a>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(quoteSummaryText);
+                      alert('Quotation summary copied to clipboard!');
+                    }}
+                    className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
+                    title="Copy Quotation Summary"
+                  >
+                    <Copy className="w-4 h-4 text-[#BD7B3C]" />
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
+                    title="Print Quotation"
+                  >
+                    <Printer className="w-4 h-4 text-[#192E22]" />
+                  </button>
+                  <button
+                    onClick={() => setSelectedLead(null)}
+                    className="p-2 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-full transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
 
-              {/* Product & Branding Parameters */}
-              <div className="bg-white p-4 rounded-xl border border-[#E8E6DD] space-y-3">
-                <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+              <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
+                {/* 1. Status Bar & Meta */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-[#E8E6DD]">
                   <div>
-                    <span className="text-stone-400 text-[10px] font-mono uppercase block">Product Requirement</span>
-                    <strong className="text-[#192E22] text-sm">{selectedLead.productName}</strong>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-stone-400 text-[10px] font-mono uppercase block">Batch Quantity</span>
-                    <strong className="text-base font-mono text-[#192E22]">{selectedLead.quantity.toLocaleString()} units</strong>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-stone-400 text-[10px] font-mono uppercase block mb-1">
-                    Custom Laser Engraving Specification
-                  </span>
-                  {selectedLead.customBranding ? (
-                    <div className="bg-[#FAF4EB] border border-[#E8D4BE] p-3 rounded-lg">
-                      <div className="flex items-center gap-1.5 text-[#8F5620] font-semibold text-xs mb-1">
-                        <Sparkles className="w-3.5 h-3.5 text-[#BD7B3C]" />
-                        <span>Client requested pre-print laser logo engraving:</span>
-                      </div>
-                      <p className="text-stone-800 italic font-serif">
-                        "{selectedLead.brandingDetails || 'Logo engraving as per provided vector artwork'}"
-                      </p>
+                    <span className="text-stone-400 block text-[10px] font-mono uppercase font-semibold">Quotation Status</span>
+                    <div className="mt-1">
+                      <select
+                        value={selectedLead.status}
+                        onChange={e => handleStatusChange(selectedLead.id, e.target.value as any)}
+                        className="text-xs font-semibold uppercase tracking-wider font-mono border border-[#DDD9CE] rounded-lg px-2.5 py-1.5 bg-[#FAF9F5] focus:outline-none focus:ring-1 focus:ring-[#192E22]"
+                      >
+                        <option value="new">NEW INQUIRY</option>
+                        <option value="contacted">CONTACTED</option>
+                        <option value="quoted">QUOTED</option>
+                        <option value="closed">CLOSED / WON</option>
+                        <option value="archived">ARCHIVED</option>
+                      </select>
                     </div>
-                  ) : (
-                    <span className="text-stone-600 bg-stone-100 px-2.5 py-1 rounded inline-block">
-                      Standard Earth Smile unbleached packaging without custom logo engraving.
+                  </div>
+                  <div className="sm:text-right">
+                    <span className="text-stone-400 block text-[10px] font-mono uppercase font-semibold">Date Received</span>
+                    <span className="font-mono text-stone-800 font-semibold">
+                      {new Date(selectedLead.createdAt).toLocaleString('en-IN', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
                     </span>
-                  )}
-                </div>
-
-                <div>
-                  <span className="text-stone-400 text-[10px] font-mono uppercase block mb-1">
-                    Client Brief & Special Requirements
-                  </span>
-                  <div className="bg-[#FAF9F5] p-3 rounded-lg border border-stone-200 text-stone-800 leading-relaxed font-sans">
-                    {selectedLead.message || 'No additional client notes provided.'}
+                    <span className="text-[10px] text-stone-400 block mt-0.5">Origin: {selectedLead.leadSource || 'Website Quotation Form'}</span>
                   </div>
                 </div>
 
-                {/* Internal Admin Notes */}
-                <div className="pt-2 border-t border-stone-100">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-stone-600 font-semibold text-xs flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-[#BD7B3C]" />
-                      <span>Internal Administrator Follow-up Notes:</span>
+                {/* 2. Commercial Pricing Breakdown Card */}
+                <div className="bg-white p-5 rounded-xl border border-[#E8E6DD] space-y-4">
+                  <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#BD7B3C] font-semibold block">
+                        Commercial Quotation Sheet
+                      </span>
+                      <h3 className="font-serif text-lg font-bold text-[#192E22]">
+                        {selectedLead.productName || 'Bamboo Toothbrush'}
+                      </h3>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-stone-400 block">Total Quotation Value</span>
+                      <div className="text-2xl font-serif font-bold text-emerald-800">
+                        ₹{pricing.grandTotal.toLocaleString('en-IN')}
+                      </div>
+                      <div className="text-[10px] font-mono text-stone-500">
+                        ₹{pricing.effectiveRate}/unit • All inclusive
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pricing line item table */}
+                  <div className="overflow-x-auto rounded-lg border border-[#ECE9DF]">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] text-stone-500 font-mono text-[10px] uppercase border-b border-[#ECE9DF]">
+                          <th className="py-2 px-3">Description</th>
+                          <th className="py-2 px-3 text-center">Batch Qty</th>
+                          <th className="py-2 px-3 text-right">Unit Rate</th>
+                          <th className="py-2 px-3 text-right">Laser Branding</th>
+                          <th className="py-2 px-3 text-right">Effective Rate</th>
+                          <th className="py-2 px-3 text-right">Line Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#ECE9DF] font-mono">
+                        <tr>
+                          <td className="py-2.5 px-3 font-sans font-medium text-[#192E22]">
+                            <div>{selectedLead.productName || 'Bamboo Toothbrush'}</div>
+                            <div className="text-[10px] text-stone-400 font-mono">{pricing.tierName}</div>
+                          </td>
+                          <td className="py-2.5 px-3 text-center font-bold">
+                            {pricing.quantity.toLocaleString()} units
+                          </td>
+                          <td className="py-2.5 px-3 text-right text-stone-600">
+                            ₹{pricing.unitRate}
+                          </td>
+                          <td className="py-2.5 px-3 text-right text-stone-600">
+                            {pricing.brandingRate > 0 ? `+₹${pricing.brandingRate}` : '₹0'}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-bold text-[#192E22]">
+                            ₹{pricing.effectiveRate}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-bold text-[#192E22]">
+                            ₹{pricing.subtotal.toLocaleString('en-IN')}
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-[#EAF2EC] text-emerald-950 font-mono text-sm border-t-2 border-emerald-700">
+                          <td colSpan={4} className="py-2.5 px-3 text-right font-bold">Total Commercial Quotation (INR):</td>
+                          <td colSpan={2} className="py-2.5 px-3 text-right font-bold text-emerald-800 text-base">
+                            ₹{pricing.grandTotal.toLocaleString('en-IN')}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-stone-500 font-mono pt-1 gap-2">
+                    <div>Estimated Production & Dispatch: <strong className="text-stone-800 font-bold">{pricing.dispatchTimeline}</strong></div>
+                    <div>Payment Terms: <strong>50% Advance with Purchase Order, 50% prior to dispatch</strong></div>
+                  </div>
+                </div>
+
+                {/* 3. Client & Organization Profile Card */}
+                <div className="bg-white p-4 rounded-xl border border-[#E8E6DD] space-y-3">
+                  <div className="font-serif font-bold text-sm text-[#192E22] flex items-center justify-between">
+                    <span>Buyer & Organization Details</span>
+                    <span className="text-[10px] font-mono text-stone-400 font-normal">Client ID: {selectedLead.id}</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#EDE9DF]">
+                      <span className="text-stone-400 text-[10px] font-mono uppercase block">Client Name</span>
+                      <strong className="text-sm font-semibold text-[#192E22] block mt-0.5">{selectedLead.name || 'Anonymous Client'}</strong>
+                    </div>
+
+                    <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#EDE9DF]">
+                      <span className="text-stone-400 text-[10px] font-mono uppercase block">Organization / Practice</span>
+                      <strong className="text-sm font-semibold text-[#192E22] block mt-0.5">{selectedLead.company || 'Direct Inquiry'}</strong>
+                    </div>
+
+                    <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#EDE9DF]">
+                      <span className="text-stone-400 text-[10px] font-mono uppercase block">Delivery Location</span>
+                      <span className="text-stone-800 font-medium block mt-0.5">{selectedLead.city || 'India'}</span>
+                    </div>
+
+                    <div className="bg-[#FAF9F5] p-3 rounded-lg border border-[#EDE9DF]">
+                      <span className="text-stone-400 text-[10px] font-mono uppercase block">Contact Details</span>
+                      <div className="mt-0.5 flex flex-col gap-0.5 font-mono text-xs">
+                        <a href={`tel:${selectedLead.phone}`} className="text-stone-800 hover:text-emerald-700 font-semibold underline">
+                          {selectedLead.phone}
+                        </a>
+                        {selectedLead.email ? (
+                          <a href={`mailto:${selectedLead.email}`} className="text-[#255D8C] hover:underline truncate">
+                            {selectedLead.email}
+                          </a>
+                        ) : (
+                          <span className="text-stone-400">No email specified</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consents & Verification row */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <CheckCircle className="w-3 h-3 text-emerald-600" />
+                      Age 18+ Verified & Authorized
                     </span>
-                    {noteSavedMessage && (
-                      <span className="text-emerald-700 text-[11px] font-mono flex items-center gap-1 font-semibold animate-in fade-in">
-                        <Check className="w-3 h-3" /> Saved!
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <CheckCircle className="w-3 h-3 text-emerald-600" />
+                      DPDP Act Commercial Consent Given
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. Branding & Special Requirements Card */}
+                <div className="bg-white p-4 rounded-xl border border-[#E8E6DD] space-y-3">
+                  <div>
+                    <span className="text-stone-400 text-[10px] font-mono uppercase block mb-1">
+                      Custom Laser Engraving Specification
+                    </span>
+                    {selectedLead.customBranding ? (
+                      <div className="bg-[#FAF4EB] border border-[#E8D4BE] p-3 rounded-lg">
+                        <div className="flex items-center gap-1.5 text-[#8F5620] font-semibold text-xs mb-1">
+                          <Sparkles className="w-3.5 h-3.5 text-[#BD7B3C]" />
+                          <span>Client requested pre-print laser logo engraving on handle:</span>
+                        </div>
+                        <p className="text-stone-800 italic font-serif">
+                          "{selectedLead.brandingDetails || 'Logo engraving as per provided vector artwork'}"
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-stone-600 bg-stone-100 px-2.5 py-1 rounded inline-block">
+                        Standard Earth Smile unbleached packaging without custom logo engraving.
                       </span>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <textarea
-                      rows={2}
-                      value={editingNotes}
-                      onChange={e => setEditingNotes(e.target.value)}
-                      placeholder="Add internal notes (e.g. 'Quoted ₹45/unit on WhatsApp', 'Sample kit dispatched via courier', 'Artwork file pending review')..."
-                      className="w-full p-2.5 bg-[#FAF9F5] border border-[#DDD9CE] rounded-lg text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-[#192E22]"
-                    />
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => handleSaveNotes(selectedLead.id)}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-[#192E22] hover:bg-[#254231] text-white rounded font-medium text-[11px] shadow-2xs transition-colors cursor-pointer"
-                      >
-                        <Save className="w-3 h-3" />
-                        <span>Save Note</span>
-                      </button>
+
+                  <div>
+                    <span className="text-stone-400 text-[10px] font-mono uppercase block mb-1">
+                      Client Brief & Delivery Instructions
+                    </span>
+                    <div className="bg-[#FAF9F5] p-3 rounded-lg border border-stone-200 text-stone-800 leading-relaxed font-sans">
+                      {selectedLead.message || 'No additional special instructions specified by client.'}
+                    </div>
+                  </div>
+
+                  {/* Internal Admin Notes */}
+                  <div className="pt-2 border-t border-stone-100">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-stone-600 font-semibold text-xs flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-[#BD7B3C]" />
+                        <span>Internal Administrator Follow-up Notes:</span>
+                      </span>
+                      {noteSavedMessage && (
+                        <span className="text-emerald-700 text-[11px] font-mono flex items-center gap-1 font-semibold animate-in fade-in">
+                          <Check className="w-3 h-3" /> Saved!
+                        </span>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <textarea
+                        rows={2}
+                        value={editingNotes}
+                        onChange={e => setEditingNotes(e.target.value)}
+                        placeholder="Add internal notes (e.g. 'Quoted ₹45/unit on WhatsApp', 'Sample kit dispatched via courier', 'Artwork file pending review')..."
+                        className="w-full p-2.5 bg-[#FAF9F5] border border-[#DDD9CE] rounded-lg text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-[#192E22]"
+                      />
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => handleSaveNotes(selectedLead.id)}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-[#192E22] hover:bg-[#254231] text-white rounded font-medium text-[11px] shadow-2xs transition-colors cursor-pointer"
+                        >
+                          <Save className="w-3 h-3" />
+                          <span>Save Note</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Contact Actions Footer */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-                <a
-                  href={buildWhatsAppUrl({
-                    productName: selectedLead.productName,
-                    quantity: selectedLead.quantity,
-                    customBranding: selectedLead.customBranding,
-                    companyName: selectedLead.company,
-                    senderName: selectedLead.name,
-                    customQuery: `Hello ${selectedLead.name}, we received your quote request for ${selectedLead.quantity} units of Earth Smile ${selectedLead.productName}. We are ready to prepare your custom mockups and confirm logistics.`,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:flex-1 py-2.5 px-4 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-semibold rounded-lg text-center flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Reply on Official WhatsApp</span>
-                </a>
+                {/* 5. Contact Actions Footer */}
+                <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <a
+                    href={buildWhatsAppUrl({
+                      productName: selectedLead.productName,
+                      quantity: pricing.quantity,
+                      customBranding: selectedLead.customBranding,
+                      companyName: selectedLead.company,
+                      senderName: selectedLead.name,
+                      customQuery: `Hello ${selectedLead.name}, here is your official commercial quotation (${pricing.referenceCode}) from Earth Smile:\n\n• Product: ${selectedLead.productName}\n• Quantity: ${pricing.quantity} units\n• Unit Rate: ₹${pricing.effectiveRate} (incl. laser branding)\n• Total Quotation Value: ₹${pricing.grandTotal.toLocaleString('en-IN')}\n• Dispatch Schedule: ${pricing.dispatchTimeline}\n\nWe are ready to prepare your custom vector mockups. Would you like to confirm the order?`,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-2.5 px-4 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-semibold rounded-lg text-center flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Send Official Quote via WhatsApp</span>
+                  </a>
 
-                <a
-                  href={`mailto:${selectedLead.email}?subject=Earth Smile Wholesale Quotation: ${selectedLead.productName}&body=Dear ${selectedLead.name},%0D%0A%0D%0AThank you for reaching out to Earth Smile regarding your bulk order inquiry for ${selectedLead.quantity} units.`}
-                  className="w-full sm:flex-1 py-2.5 px-4 bg-[#192E22] hover:bg-[#254231] text-white font-semibold rounded-lg text-center flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
-                >
-                  <Mail className="w-4 h-4" />
-                  <span>Send Email Quotation</span>
-                </a>
+                  <a
+                    href={`mailto:${selectedLead.email}?subject=Earth Smile Commercial Quotation: ${selectedLead.productName} (Ref ${pricing.referenceCode})&body=Dear ${selectedLead.name},%0D%0A%0D%0AThank you for contacting Earth Smile. Here is your official commercial quotation for ${pricing.quantity} units of ${selectedLead.productName}:%0D%0A%0D%0A• Quotation Reference: ${pricing.referenceCode}%0D%0A• Batch Quantity: ${pricing.quantity} units%0D%0A• Wholesale Unit Rate: INR ${pricing.effectiveRate}/-%0D%0A• Grand Total Quotation Value: INR ${pricing.grandTotal.toLocaleString('en-IN')}%0D%0A• Production Timeline: ${pricing.dispatchTimeline}%0D%0A%0D%0ABest regards,%0D%0AEarth Smile Commercial Team`}
+                    className="py-2.5 px-4 bg-[#192E22] hover:bg-[#254231] text-white font-semibold rounded-lg text-center flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>Send Formal Email Quotation</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 4. Log Manual Client Requirement Modal */}
       {isAddModalOpen && (

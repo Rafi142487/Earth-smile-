@@ -37,7 +37,7 @@ export const TrustSection: React.FC = () => {
         '±0.05mm precision industrial CO2 laser engraving systems',
         'Live 3D pre-print digital proofing on this website before ordering',
         'Pre-production physical sample dispatch available on request',
-        'GST invoices and pan-India enterprise logistics support',
+        'Commercial invoices and pan-India enterprise logistics support',
       ],
     },
   ];

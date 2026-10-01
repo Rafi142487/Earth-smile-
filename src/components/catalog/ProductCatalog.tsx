@@ -4,6 +4,7 @@ import { CATEGORIES } from '../../data/categories';
 import { ProductVisual } from '../common/ProductVisual';
 import { Search, SlidersHorizontal, ArrowUpRight, Check, X, ShieldCheck } from 'lucide-react';
 import { buildWhatsAppUrl } from '../../utils/whatsapp';
+import { WhatsAppIcon } from '../common/WhatsAppIcon';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -266,10 +267,10 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => onOpenEnquiry(product.name)}
-                      className="w-full py-2.5 px-3 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all text-center cursor-pointer shadow-xs"
+                      className="flex-1 py-2.5 px-3 text-xs font-semibold text-white bg-[#192E22] hover:bg-[#254231] rounded-lg transition-all text-center cursor-pointer shadow-xs"
                     >
                       Enquire Now
                     </button>
@@ -282,9 +283,11 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                       })}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2.5 px-3 text-xs font-semibold text-[#192E22] bg-[#EAF2EC] hover:bg-[#DCEADA] border border-[#CCDDCF] rounded-lg transition-all text-center flex items-center justify-center cursor-pointer"
+                      title="Direct WhatsApp"
+                      aria-label="Direct WhatsApp"
+                      className="w-10 h-10 shrink-0 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95"
                     >
-                      WhatsApp
+                      <WhatsAppIcon className="w-5 h-5 fill-white" />
                     </a>
                   </div>
                 </div>
